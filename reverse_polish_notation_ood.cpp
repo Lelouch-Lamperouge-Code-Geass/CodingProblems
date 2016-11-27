@@ -1,3 +1,19 @@
+// ConsoleApplication1.cpp : Defines the entry point for the console application.
+//
+
+#include "stdafx.h"
+
+#include <vector>
+#include <memory>
+#include <unordered_set>
+#include <string>
+#include <cctype>
+#include <stack>
+#include <numeric>
+#include <functional> 
+
+using namespace std;
+
 // Abstract class for operators
 class Operator {
 public:
@@ -7,6 +23,7 @@ public:
 	};
 	explicit Operator(OpType ot) {m_op_type = ot;}
 	virtual ~Operator() {}
+	virtual double get_result(const vector<double> & values) {return 0.0;}
 	OpType m_op_type;
 };
 // Abstract class for binary operators
@@ -14,31 +31,30 @@ class BinaryOperator : public Operator {
 public:
 	BinaryOperator():Operator(Operator::Binary){}
 	virtual ~BinaryOperator(){}
-	virtual double operator() (double,double) = 0;
 };
 
 class Add : public BinaryOperator {
 public:
 	Add(){}
-	virtual double operator() (double left, double right) { return left + right;}
+	virtual double get_result(const vector<double> & values) { return std::accumulate(values.begin(),values.end(), 0.0,std::plus<double>());}
 };
 
 class Sub : public BinaryOperator {
 public:
 	Sub(){}
-	virtual double operator() (double left, double right) { return left - right;}
+	virtual double get_result(const vector<double> & values)  { return std::accumulate(values.begin(),values.end(), 0.0, std::minus<double>());}
 };
 
 class Mul : public BinaryOperator {
 public:
 	Mul(){}
-	virtual double operator() (double left, double right) { return left * right;}
+	virtual double get_result(const vector<double> & values) { return std::accumulate(values.begin(),values.end(), 1.0, std::multiplies<double>());}
 };
 
 class Div : public BinaryOperator {
 public:
 	Div(){}
-	virtual double operator() (double left, double right) { return left / right;}
+	virtual double get_result(const vector<double> & values)  { return std::accumulate(values.begin()+1,values.end(), values.front(), std::divides<double>());}
 };
 
 class Token {
@@ -71,48 +87,67 @@ private:
 };
 
 class Calculator {
+	
 public:
 	Calculator(){}
 
 	double calculate(Tokenizer tokenizer) {
 		preprocess(tokenizer);// populate operators and operands
 		while ( !m_operators.empty() ) {
-			const BinaryOperator & op = m_operators.top();
-			if (op.m_op_type == Operator::Binary) {
-
+			std::shared_ptr<Operator> op =  m_operators.top();
+			m_operators.pop();
+			if (op->m_op_type == Operator::Binary) {
 				double right = m_operands.top(); 
 				m_operands.pop();
 				double left = m_operands.top();
 				m_operands.pop();
 
-				m_operands.push( op(left,right) );
+				vector<double> values;
+				values.push_back(left);
+				values.push_back(right);
+				double res = op->get_result( values ) ;
+				m_operands.push( op->get_result( values ) );
+			} else {
+				// default unary operation
+				
 			}
 		}
+		return m_operands.top();
 	}
 private:
 	void preprocess(Tokenizer tokenizer) {
-		m_operators = std::stack<Operator>();
+		m_operators = std::stack<std::shared_ptr<Operator> >();
 		m_operands = std::stack<double>(); //
 		while(tokenizer.has_next()) {
 			const Token & tk = tokenizer.next_token();
 			if ( !std::isdigit( tk.m_text[0]) ) {
-				m_operators.push(get_operator(tk.m_text[0]));
+				m_operators.push( get_operator(tk.m_text[0]) );
 			} else {
 				m_operands.push(std::stod(tk.m_text));
 			}
 		}
 	}
 
-	static Operator get_operator(const char c) {
+	static std::shared_ptr<Operator> get_operator(const char c) {
 		switch (c) {
-		case '+' : return Add();
-		case '-' : return Sub();
-		case '*' : return Mul();
-		case '/' : return Div();
+		case '+' : return std::make_shared<Add>();
+		case '-' : return std::make_shared<Sub>();
+		case '*' : return std::make_shared<Mul>();
+		case '/' : return std::make_shared<Div>();
 		default:
 			throw invalid_argument ("Invalid operator");
 		}
 	}
-	std::stack<Operator> m_operators;
+
+	std::stack<	std::shared_ptr<Operator> > m_operators;
 	std::stack<double> m_operands;
 };
+
+int _tmain(int argc, _TCHAR* argv[])
+{
+	Tokenizer tk("3+2/5-2*4");
+	Calculator cal;
+	double value = cal.calculate(tk);
+	return 0;
+}
+
