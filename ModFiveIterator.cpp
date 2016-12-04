@@ -3,16 +3,19 @@
 
 class Iterator {
 public:
-	Iterator(const vector<int>& nums):m_nums(nums),m_nums_size(nums.size()),m_pos(0){
+	Iterator(const vector<int>& nums):
+	m_nums(nums),
+	m_nums_size(nums.size()),
+	m_pos(0){
 
 	}
     Iterator(const Iterator& iter);
 	virtual ~Iterator(){}
-    // Returns the next element in the iteration.
+    	// Returns the next element in the iteration.
 	int next(){
 		return m_nums[m_pos++];
 	}
-    // Returns true if the iteration has more elements.
+    	// Returns true if the iteration has more elements.
 	bool hasNext(){
 		return m_pos < m_nums_size;
 	}
@@ -27,8 +30,11 @@ class ModFiveIterator : public Iterator {
     int m_res;
     bool m_peeked; // peeked next number or not, specificlly whether m_next_five has been updated or not
 public:
-	ModFiveIterator(const vector<int>& nums):Iterator(nums),m_res(-1),m_peeked(false){
-		
+	ModFiveIterator(const vector<int>& nums):
+	Iterator(nums),
+	m_res(-1),
+	m_peeked(false){
+
 	}
     int next() {
         hasNext();
@@ -37,20 +43,20 @@ public:
     }
     
     bool hasNext()  {
-		if(m_peeked) {
-			// already peeked the next valid number
-			return true;
-		} else {
-			// Let's peek the next number which%5==0
-            while(Iterator::hasNext()) {
-                m_res = Iterator::next();
-				if (m_res % 5 ==0) {
-					m_peeked = true;
-					return true;
-				}
+	if(m_peeked) {
+		// already peeked the next valid number
+		return true;
+	} else {
+		// Let's peek the next number which%5==0
+    		while(Iterator::hasNext()) {
+			m_res = Iterator::next();
+			if (m_res % 5 ==0) {
+				m_peeked = true;
+				return true;
 			}
-			return false; // not found
-        }
+		}
+		return false; // not found
+	}
     }
     
 };
