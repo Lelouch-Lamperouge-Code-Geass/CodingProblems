@@ -1,45 +1,50 @@
 // URL: https://www.hackerrank.com/contests/juniper-hackathon/challenges/friend-circles
 /* Solution 1 with union find*/
 class UnionFind {
-public:
-	UnionFind(int n) :m_num(n),m_ids(n,-1),m_count(n){
-		for (int i=0;i<m_num;++i) {
-			m_ids[i] = i;
-		}
-	}
-	bool is_connected(int node1, int node2) {return m_ids[node1] == m_ids[node2];}
-	int find(int node) {return m_ids[node];}
-	int get_count() {return m_count;}
-	// If two nodes are in different disjoint-set, union their set together.
+  public:
+    UnionFind(const int n):m_people_count(n),m_union_count(n),m_ids(n,0){
+        for (int i=0;i<n;++i) m_ids[i] = i;
+    }
+    bool IsConnected(int i, int j) {
+        return m_ids[i]==m_ids[j];
+    }
+    // If two nodes are in different disjoint-set, union their set together.
 	// Here we go through all the nodes, if any node's id is the same as node2,
 	// which means it is at the same disjoint-set with node2, we reset its id value
 	// to be the same as node1.
-	void union_set(int node1,int node2) {
-		const int id1 = m_ids[node1], id2 = m_ids[node2];
-		if (id1 != id2) {
-			for (int i=0;i<m_num;++i) {
-				if (m_ids[i] == id2) m_ids[i] = id1;
-			}
-			-- m_count;
-		}
-	}
-private:
-	int m_num; // how many nodes in total
-	int m_count; // how many disjoint-set 
-	vector<int> m_ids; // ID of each node,ID is the representative of each disjoint-set
+    void Connect(int ppl1,int ppl2){
+        int id1 = m_ids[ppl1], id2 = m_ids[ppl2];
+        if (id1!=id2) {
+            for (int i=0;i<m_people_count;++i) {
+                if (m_ids[i]==m_ids[ppl2]) m_ids[i] = m_ids[ppl1];
+            }
+            -- m_union_count;
+        }
+    }
+    int GetUnionCount() {
+        return m_union_count;
+    }
+  private:
+    int m_people_count;
+    int m_union_count;
+    vector<int> m_ids; 
 };
-int friend_circle(vector<string>  friends){
-	const int n(friends.size());
-	UnionFind uf(n);
-	for (int i=0;i<n;++i) {
-		for (int j=0;j<n;++j) {
-			if (friends[i][j]=='Y' && !uf.is_connected(i,j)) {
-				uf.union_set(i,j);
-			}
-		}
-	}
-	return uf.get_count();
+
+int FriendCircles(vector<string> friends) {
+    if (friends.empty()) return 0;
+    const int n_size(friends.size());
+    UnionFind union_finder(n_size);
+
+    for (int i=0;i<n_size;++i) {
+        for (int j=i;j<n_size;++j) {
+            if (friends[i][j]=='Y' && !union_finder.IsConnected(i,j)) {
+                union_finder.Connect(i,j);
+            }
+        }
+    }
+    return union_finder.GetUnionCount();
 }
+
 
 /* Solution 2 with BFS*/
 
