@@ -73,6 +73,33 @@ int friend_circle(vector<string>  friends){
 	return reval;
 }
 
+/* Solution 3 : DFS */
+void dfs(vector<string> & friends, int row, int col) {
+    const int n_size(friends.size());
+    if (row<0||col<0||row>=n_size||col>=n_size || friends[row][col]=='N') 
+        return;
+    friends[row][col]=friends[col][row]='N';
+    dfs(friends,row-1,col);
+    dfs(friends,row+1,col);
+    dfs(friends,row,col-1);
+    dfs(friends,row,col+1);
+}
+
+int FriendCircles(vector<string> friends) {
+    if (friends.empty()) return 0;
+    const int n_size(friends.size());
+    int reval(0);
+    for (int i=0;i<n_size;++i) {
+        for (int j=i;j<n_size;++j) {
+            if (friends[i][j]=='Y') {
+                dfs(friends,i,j);
+                ++ reval;
+            }
+        }
+    }
+    return reval;
+}
+/* Main function*/
 int main() {
     /* Enter your code here. Read input from STDIN. Print output to STDOUT */  
     int num;
