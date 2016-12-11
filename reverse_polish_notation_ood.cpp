@@ -1,60 +1,89 @@
-// ConsoleApplication1.cpp : Defines the entry point for the console application.
-//
 
-#include "stdafx.h"
 
-#include <vector>
-#include <memory>
-#include <unordered_set>
-#include <string>
-#include <cctype>
-#include <stack>
-#include <numeric>
-#include <functional> 
-
-using namespace std;
-
-// Abstract class for operators
-class Operator {
+// Interpreter Design Pattern: Interpreter pattern provides a way to evaluate language grammar or expression. 
+// This pattern involves implementing an expression interface which tells to interpret a particular context. 
+class IExpression {
 public:
-	enum OpType{
-		Binary,
-		Unary
-	};
-	explicit Operator(OpType ot) {m_op_type = ot;}
-	virtual ~Operator() {}
-	virtual double get_result(const vector<double> & values) {return 0.0;}
-	OpType m_op_type;
+	virtual double Interpret() { return 0;}
+	~IExpression(){}
 };
-// Abstract class for binary operators
-class BinaryOperator : public Operator {
+typedef std::shared_ptr<IExpression> IExpressionPtr;
+
+class NumberExpression : public IExpression {
 public:
-	BinaryOperator():Operator(Operator::Binary){}
-	virtual ~BinaryOperator(){}
+	NumberExpression(const double val) : m_value(val){}
+	virtual double Interpret() {return m_value;}
+private:
+	double m_value;
+};
+typedef std::shared_ptr<NumberExpression> NumberExpressionPtr;
+
+class AddExpression : public IExpression {
+public:
+	AddExpression(const IExpressionPtr & left, const IExpressionPtr & right) : m_left(left),m_right(right){
+	}
+	virtual double Interpret() { return m_left->Interpret() + m_right->Interpret();}
+private:
+	IExpressionPtr m_left;
+	IExpressionPtr m_right;
+};
+class SubExpression : public IExpression {
+public:
+	SubExpression(const IExpressionPtr & left, const IExpressionPtr & right) : m_left(left),m_right(right){
+	}
+	virtual double Interpret() { return m_left->Interpret() - m_right->Interpret();}
+private:
+	IExpressionPtr m_left;
+	IExpressionPtr m_right;
+};
+class MulExpression : public IExpression {
+public:
+	MulExpression(const IExpressionPtr & left, const IExpressionPtr & right) : m_left(left),m_right(right){
+	}
+	virtual double Interpret() { return m_left->Interpret() * m_right->Interpret();}
+private:
+	IExpressionPtr m_left;
+	IExpressionPtr m_right;
+};
+class DivExpression : public IExpression {
+public:
+	DivExpression(const IExpressionPtr & left, const IExpressionPtr & right) : m_left(left),m_right(right){
+	}
+	virtual double Interpret() { return m_left->Interpret() / m_right->Interpret();}
+private:
+	IExpressionPtr m_left;
+	IExpressionPtr m_right;
 };
 
-class Add : public BinaryOperator {
+// Singleton Design Pattern 
+class OperatorFactory {
 public:
-	Add(){}
-	virtual double get_result(const vector<double> & values) { return std::accumulate(values.begin(),values.end(), 0.0,std::plus<double>());}
-};
+	static OperatorFactory & Instance() {
+		static OperatorFactory instance;
+		return instance;
+	}
+	bool IsOperator(const char c) const {
+		return m_operators.find(c) !=m_operators.end();
+	}
+	std::shared_ptr<IExpression> GetOperator(const char  c, const IExpressionPtr & left, const IExpressionPtr & right) const {
+		switch (c) {
+		case '+' : return std::make_shared<AddExpression>(left,right);
+		case '-' : return std::make_shared<SubExpression>(left,right);
+		case '*' : return std::make_shared<MulExpression>(left,right);
+		case '/' : return std::make_shared<DivExpression>(left,right);
+		default:
+			throw invalid_argument ("Invalid operator");
+		}
+	}
+private:
+	OperatorFactory() {
+		m_operators.insert('+');
+		m_operators.insert('-');
+		m_operators.insert('*');
+		m_operators.insert('/');
+	}
 
-class Sub : public BinaryOperator {
-public:
-	Sub(){}
-	virtual double get_result(const vector<double> & values)  { return std::accumulate(values.begin(),values.end(), 0.0, std::minus<double>());}
-};
-
-class Mul : public BinaryOperator {
-public:
-	Mul(){}
-	virtual double get_result(const vector<double> & values) { return std::accumulate(values.begin(),values.end(), 1.0, std::multiplies<double>());}
-};
-
-class Div : public BinaryOperator {
-public:
-	Div(){}
-	virtual double get_result(const vector<double> & values)  { return std::accumulate(values.begin()+1,values.end(), values.front(), std::divides<double>());}
+	unordered_set<char> m_operators;
 };
 
 class Token {
@@ -66,22 +95,14 @@ public:
 class Tokenizer {
 public:
 	Tokenizer(const std::string & str) {
-		std::size_t index(0);
-		while (index!=std::string::npos) {
-			if (str[index]==' ') { //ignore whitespaces
-				index = str.find_first_not_of(" ",index+1);
-			} else if( std::isdigit(str[index])) { // number
-				std::size_t found  = str.find_first_not_of("0123456789",index);
-				m_tokens.push_back( str.substr(index,found-index) );
-				index = found;
-			} else { // +,-,*,/
-				m_tokens.push_back( str.substr(index,1));
-				++ index;
-			}
+		std::istringstream iss(str);
+		string temp("");
+		while (std::getline(iss,temp,',')) {
+			m_tokens.push_back(Token(temp));
 		}
 	}
-	bool has_next() {return !m_tokens.empty();}
-	Token next_token() {Token token = m_tokens.front();m_tokens.pop_front();return token; }
+	bool HasNext() {return !m_tokens.empty();}
+	Token NextToken() {Token token = m_tokens.front();m_tokens.pop_front();return token; }
 private:
 	std::list<Token> m_tokens;
 };
@@ -90,64 +111,37 @@ class Calculator {
 	
 public:
 	Calculator(){}
-
-	double calculate(Tokenizer tokenizer) {
-		preprocess(tokenizer);// populate operators and operands
-		while ( !m_operators.empty() ) {
-			std::shared_ptr<Operator> op =  m_operators.top();
-			m_operators.pop();
-			if (op->m_op_type == Operator::Binary) {
-				double right = m_operands.top(); 
+	double Calculate(Tokenizer & tokenizer) {
+		const OperatorFactory & op_factory = OperatorFactory::Instance();
+		while (tokenizer.HasNext()) {
+			const Token & cur_token = tokenizer.NextToken();
+			if ( op_factory.IsOperator(cur_token.m_text[0]) ) {
+				IExpressionPtr right = m_operands.top();
 				m_operands.pop();
-				double left = m_operands.top();
+				IExpressionPtr left = m_operands.top();
 				m_operands.pop();
-
-				vector<double> values;
-				values.push_back(left);
-				values.push_back(right);
-				double res = op->get_result( values ) ;
-				m_operands.push( op->get_result( values ) );
+				std::shared_ptr<IExpression> op = op_factory.GetOperator(cur_token.m_text[0],left,right);
+				m_operands.push( std::make_shared<NumberExpression>(op->Interpret()));
 			} else {
-				// default unary operation
-				
+				m_operands.push( std::make_shared<NumberExpression>(std::stod(cur_token.m_text) ) ) ;
 			}
 		}
-		return m_operands.top();
+		return m_operands.top()->Interpret();
 	}
 private:
-	void preprocess(Tokenizer tokenizer) {
-		m_operators = std::stack<std::shared_ptr<Operator> >();
-		m_operands = std::stack<double>(); //
-		while(tokenizer.has_next()) {
-			const Token & tk = tokenizer.next_token();
-			if ( !std::isdigit( tk.m_text[0]) ) {
-				m_operators.push( get_operator(tk.m_text[0]) );
-			} else {
-				m_operands.push(std::stod(tk.m_text));
-			}
-		}
-	}
-
-	static std::shared_ptr<Operator> get_operator(const char c) {
-		switch (c) {
-		case '+' : return std::make_shared<Add>();
-		case '-' : return std::make_shared<Sub>();
-		case '*' : return std::make_shared<Mul>();
-		case '/' : return std::make_shared<Div>();
-		default:
-			throw invalid_argument ("Invalid operator");
-		}
-	}
-
-	std::stack<	std::shared_ptr<Operator> > m_operators;
-	std::stack<double> m_operands;
+	std::stack< NumberExpressionPtr > m_operands;
 };
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	Tokenizer tk("3+2/5-2*4");
+	Tokenizer tk("4,3,2,-,1,+,*");
 	Calculator cal;
-	double value = cal.calculate(tk);
+	double value = cal.Calculate(tk);
+	assert(value==8);
+
+	Tokenizer tk2("3,2,5,/,+,2,4,*,-");//3+2/5-2*4
+	value = cal.Calculate(tk2);
+	assert(value==-4.6);
 	return 0;
 }
 
