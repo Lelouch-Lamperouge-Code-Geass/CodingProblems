@@ -1,6 +1,8 @@
 /*
-给你两个independent
-queue，每个queue都存着timestamp，只能有getNext()来取queue里面的timestamp，
+A blocking queue is a queue that blocks when you try to dequeue from it and the queue is empty, 
+or if you try to enqueue items to it and the queue is already full. 
+A thread trying to dequeue from an empty queue is blocked until some other thread inserts an item into the queue.
+Given two blocking queues，每个queue都存着timestamp，只能有getNext()来取queue里面的timestamp，
 每个timestamp只能被取一次，比较这两个queue里的timestamp，如果差值<1，print这两个timestamp。
 例如： //Q1 0.2, 1.4, 3.0 //Q2 1.0 1.1, 3.5 //output: (0.2, 1.0), (1.4, 1.0),
 (0.2, 1.1), (1.4, 1.1), (3.0, 3.5)
