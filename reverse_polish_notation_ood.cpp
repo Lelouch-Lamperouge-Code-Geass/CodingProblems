@@ -4,9 +4,16 @@ Interpreter Design Pattern: Interpreter pattern provides a way to evaluate langu
 This pattern involves implementing an expression interface which tells to interpret a particular context. 
 In computer programming, the interpreter pattern is a design pattern that specifies how to evaluate sentences 
 in a language. The basic idea is to have a class for each symbol (terminal or nonterminal) in a specialized 
-computer language. The syntax tree of a sentence in the language is an instance of the composite pattern and is used to evaluate (interpret) the sentence for a client.
-In computer science, an abstract syntax tree (AST), or just syntax tree, is a tree representation of the abstract syntactic structure of source code written in a programming language. Each node of the tree denotes a construct occurring in the source code. The syntax is "abstract" in not representing every detail appearing in the real syntax.
-A parse tree or parsing tree or derivation tree or (concrete) syntax tree is an ordered, rooted tree that represents the syntactic structure of a string according to some context-free grammar. The term parse tree itself is used primarily in computational linguistics; in theoretical syntax the term syntax tree is more common. Parse trees are distinct from the abstract syntax trees used in computer programming, in that their structure and elements more concretely reflect the syntax of the input language. 
+computer language. The syntax tree of a sentence in the language is an instance of the composite pattern and 
+is used to evaluate (interpret) the sentence for a client. In computer science, an abstract syntax tree (AST), 
+or just syntax tree, is a tree representation of the abstract syntactic structure of source code written in 
+a programming language. Each node of the tree denotes a construct occurring in the source code. 
+The syntax is "abstract" in not representing every detail appearing in the real syntax.
+A parse tree or parsing tree or derivation tree or (concrete) syntax tree is an ordered, 
+rooted tree that represents the syntactic structure of a string according to some context-free grammar. 
+The term parse tree itself is used primarily in computational linguistics; in theoretical syntax 
+the term syntax tree is more common. Parse trees are distinct from the abstract syntax trees used in computer programming, 
+in that their structure and elements more concretely reflect the syntax of the input language. 
 */
 class IExpression {
 public:
