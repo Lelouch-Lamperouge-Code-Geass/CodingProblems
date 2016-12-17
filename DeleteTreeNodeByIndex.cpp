@@ -1,3 +1,10 @@
+
+/*
+Define a TreeNode which contains ［parent index，value，valid］at least.
+Given an array of TreeNode, how can you delete a sub-stree by a given index?
+Here, valid=false means the node has been deleted.
+*/
+
 #include <vector>
 #include <sstream>
 #include <cassert>
@@ -44,6 +51,10 @@ public:
   }
   
 private:
+   // reverse depth-first-search to its parent node until meet visited node
+  // or reach root node. If it is visited, unwinding back.
+  // This will make sure we only visit each node twice.
+  // Running time is O(N);
   void DeleteWithReverseDfs(int index,std::vector<bool> & visited){
     if (index<0 || visited[index]) return;
     int pix = m_nodes[index].m_parent_index;
