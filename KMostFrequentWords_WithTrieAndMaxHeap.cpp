@@ -8,6 +8,14 @@
 #include <cctype> // to lower
 
 /*
+You have to consider below questions before make the right decision:
+(1) Will the word contain letter only, how about "Pre–Civil" ?
+(2) Should the word being treadted case-insensitive?
+(3) How to reduce memory cost ?
+(4) How to improve performance ?
+(5) Should the final results sorted alphabetically? (Trie can support that naturally)
+
+
 You can use HashMap to record the word and count, and eventually iterate the HashMap
 and push word and count item into a MaxHeap. This is the most intuitive solution.
 But the downside is that if you use the whole word as Key, then HashMap will cost more
