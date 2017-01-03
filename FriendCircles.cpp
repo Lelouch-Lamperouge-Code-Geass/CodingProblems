@@ -1,5 +1,6 @@
 // URL: https://www.hackerrank.com/contests/juniper-hackathon/challenges/friend-circles
 /* Solution 1 with union find*/
+// http://www.1point3acres.com/bbs/thread-135529-1-1.html
 class UnionFind {
 public:
   UnionFind(const int num)
