@@ -1,49 +1,51 @@
 // URL: https://www.hackerrank.com/contests/juniper-hackathon/challenges/friend-circles
 /* Solution 1 with union find*/
+// http://www.1point3acres.com/bbs/thread-135529-1-1.html
 class UnionFind {
-  public:
-    UnionFind(const int n):m_people_count(n),m_union_count(n),m_ids(n,0){
-        for (int i=0;i<n;++i) m_ids[i] = i;
+public:
+  UnionFind(const int num)
+    :m_union_count(num),m_ids(num,0){
+    for (int i=0;i<num;++i) {
+      m_ids[i] = i;
     }
-    bool IsConnected(int i, int j) {
-        return m_ids[i]==m_ids[j];
+  }
+  // Determine which subset a particular element is in
+  int Find(int i) {
+    return m_ids[i];
+  }
+  bool IsConnected(int i, int j){
+    return Find(i) == Find(j);
+  }
+  // Join two subsets into a single subset.
+  void Union(int i, int j){
+    int i_id = Find(i), j_id = Find(j);
+    if (i_id!=j_id) {
+      for (int k=0;k<m_ids.size();++k) {
+        if (m_ids[k]==j_id) m_ids[k] = i_id;
+      }
+      -- m_union_count;
     }
-    // If two nodes are in different disjoint-set, union their set together.
-	// Here we go through all the nodes, if any node's id is the same as node2,
-	// which means it is at the same disjoint-set with node2, we reset its id value
-	// to be the same as node1.
-    void Connect(int ppl1,int ppl2){
-        int id1 = m_ids[ppl1], id2 = m_ids[ppl2];
-        if (id1!=id2) {
-            for (int i=0;i<m_people_count;++i) {
-                if (m_ids[i]==m_ids[ppl2]) m_ids[i] = m_ids[ppl1];
-            }
-            -- m_union_count;
-        }
-    }
-    int GetUnionCount() {
-        return m_union_count;
-    }
-  private:
-    int m_people_count;
-    int m_union_count;
-    vector<int> m_ids; 
+  }
+  int GetUnionCount() { return m_union_count;}
+private:
+  std::vector<int> m_ids;
+  int m_union_count;
 };
 
-int FriendCircles(vector<string> friends) {
-    if (friends.empty()) return 0;
-    const int n_size(friends.size());
-    UnionFind union_finder(n_size);
-
-    for (int i=0;i<n_size;++i) {
-        for (int j=i;j<n_size;++j) {
-            if (friends[i][j]=='Y' && !union_finder.IsConnected(i,j)) {
-                union_finder.Connect(i,j);
-            }
-        }
+int FriendCirclesCount(std::vector<std::string> & friends) {
+  if (friends.empty()) return 0;
+  int friends_size(friends.size());
+  UnionFind union_find(friends_size);
+  for (int i=0;i<friends_size;++i) {
+    for (int j=0;j<friends_size;++j) {
+      if (friends[i][j]=='Y' && !union_find.IsConnected(i,j)){
+        union_find.Union(i,j);
+      }
     }
-    return union_finder.GetUnionCount();
+  }
+  return union_find.GetUnionCount();
 }
+
 
 
 /* Solution 2 with BFS*/
