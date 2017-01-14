@@ -1,13 +1,68 @@
+// http://stackoverflow.com/questions/32748069/the-reason-of-using-stdgreater-for-creating-min-heap-via-priority-queue
 // http://www.johndcook.com/blog/standard_deviation/
 // https://leetcode.com/problems/find-median-from-data-stream/
 
+// the implementation of pop_heap uses something called sift_down (and push_heap uses sift_up
 #include <cassert>
 #include <queue>
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 
-typedef std::priority_queue<double,std::vector<double>,std::less<double> > MaxHeap;
-typedef std::priority_queue<double,std::vector<double>,std::greater<double> > MinHeap;
+class MaxHeap {
+public:
+  MaxHeap() {}
+  void push(double number) {
+    // Add the number to the vector
+    m_values.push_back(number);
+    // Placing the last value at the front element and restore the heap
+    // I have to say, std::less is very confusing here for a max-heap
+    std::push_heap(m_values.begin(),m_values.end(),std::less<double>());
+  }
+  
+  void pop() {
+    // put the front element at the back of the sequence and reduce
+    // the size of the heap by one
+    std::pop_heap(m_values.begin(),m_values.end(),std::less<double>());
+    // Actually remove the top element
+    m_values.pop_back();
+  }
+  // Notice that the top element is always at front
+  double top() const { return m_values.front(); }
+  
+  double KthElement(std::size_t k) const {
+    if(k<1||k>m_values.size()) {
+      return top();
+    } else {
+      return m_values[m_values.size()-k];
+    }
+  }
+  std::size_t size() const { return m_values.size();}
+private:
+  std::vector<double> m_values;
+};
+
+class MinHeap {
+public:
+  MinHeap() {}
+  void push(double number) {
+    m_values.push_back(number);
+    std::push_heap(m_values.begin(),m_values.end(),std::greater<double>());
+  }
+  void pop() {
+    // put the minimum element at the back of the sequence
+    // and reduce the size of the heap by one
+    std::pop_heap(m_values.begin(),m_values.end(),std::greater<double>());
+    m_values.pop_back();
+  }
+  double top() const { return m_values.front(); }
+  double KthElement(std::size_t k) const{
+    
+  }
+  std::size_t size() const { return m_values.size();}
+private:
+  std::vector<double> m_values;
+};
 
 class RunningStat {
 public:
@@ -56,6 +111,7 @@ private:
     m_mean += (number - pre_mean) / m_count;
     m_sum_of_square +=  (number-pre_mean) * (number-m_mean);
   }
+  
   MaxHeap m_max_heap;
   MinHeap m_min_heap;
   
