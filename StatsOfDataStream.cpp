@@ -15,8 +15,10 @@ public:
   void push(double number) {
     // Add the number to the vector
     m_values.push_back(number);
-    // Placing the last value at the front element and restore the heap
-    // I have to say, std::less is very confusing here for a max-heap
+    // Placing the last value at the front element and restore the heap,
+    // Notice that std::less will be used for heap sift down procedure,
+    // it has nothing to do with sorting the vector.
+    // http://www.diku.dk/forskning/performance-engineering/Jesper/heaplab/heapsurvey_html/node7.html#SECTION00322000000000000000
     std::push_heap(m_values.begin(),m_values.end(),std::less<double>());
   }
   
