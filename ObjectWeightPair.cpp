@@ -17,6 +17,8 @@
 #include <list>
 #include <cstdlib>
 #include <iostream>
+#include <unordered_map>
+#include <algorithm>
 
 struct WeightObject {
   WeightObject(const std::string & label,int weight) : m_label(label), m_weight(weight) {}
@@ -89,7 +91,7 @@ namespace SegmentTreeSolution {
 }
 
 
-int main() {
+void UnitTest_SegmentTreeSolution() {
   std::vector<WeightObjectPtr> objects = {std::make_shared<WeightObject>("apple",4),
                                           std::make_shared<WeightObject>("orange",2),
                                           std::make_shared<WeightObject>("lemon",1)};
@@ -99,5 +101,97 @@ int main() {
     WeightObjectPtr node = segment_tree_container.GetRandom();
     std::cout <<node->m_label<<std::endl;
   }
+}
+
+namespace PrefixSumSolution {
+  class PrefixSum {
+  public:
+    PrefixSum(const std::vector<WeightObjectPtr> & objects)  {
+      for (const WeightObjectPtr & obj : objects) {
+        Insert(obj);
+      }
+    }
+    
+    bool NotZero(int v) {return (v>0);}
+    WeightObjectPtr GetRandom() {
+      int val = rand() % (m_pre_sum.back()+1);
+      auto first_non_zero_iter = std::find_if(m_pre_sum.begin(),m_pre_sum.end(),NotZero);
+      auto iter =  std::lower_bound(first_non_zero_iter,m_pre_sum.end(),val);
+      std::size_t index = iter - m_pre_sum.begin();
+      return m_index_to_object[index];
+    }
+    void Update(const WeightObjectPtr & obj_ptr,int new_weight) {
+      if (m_object_to_index.count(obj_ptr) == 0) return;
+      std::size_t index = m_object_to_index[obj_ptr];
+      int diff = new_weight - m_index_to_object[index]->m_weight;
+      for (std::size_t i=index;i<m_pre_sum.size();++i) {
+        m_pre_sum[i] += diff;
+      }
+      obj_ptr->m_weight = new_weight;
+    }
+    // Add a new weight-object pair, update if already added.
+    void Insert(const WeightObjectPtr & obj_ptr) {
+      if (m_object_to_index.count(obj_ptr)!=0) {
+        Update(obj_ptr,obj_ptr->m_weight);
+      } else {
+        if (m_pre_sum.empty() ) {
+          m_pre_sum.push_back(obj_ptr->m_weight-1); // first element minus one, since 4 should only map[0,3]
+        } else {
+          m_pre_sum.push_back(m_pre_sum.back() + obj_ptr->m_weight);
+        }
+        m_index_to_object[m_pre_sum.size()-1] = obj_ptr; // store index -> object
+        m_object_to_index[obj_ptr] = m_pre_sum.size()-1; // store object -> index
+      }
+    }
+    void Remove(const WeightObjectPtr & obj_ptr) {
+      if (m_object_to_index.count(obj_ptr)==0) return;
+    
+      std::size_t index = m_object_to_index[obj_ptr];
+      int diff = 0 - m_index_to_object[index]->m_weight;
+
+      //Notice that range 4 means [0-3] for first item
+      for (std::size_t i=index;i<m_pre_sum.size();++i) {
+        m_pre_sum[i] += diff;
+      }
+      if (index==0) m_pre_sum[0] = 0;
+          
+      m_index_to_object.erase(index); // remove index -> object
+      m_object_to_index.erase(obj_ptr); // remove object -> index
+    }
+  private:
+    std::vector<int> m_pre_sum;
+    std::unordered_map<std::size_t,WeightObjectPtr> m_index_to_object;
+    std::unordered_map<WeightObjectPtr,std::size_t> m_object_to_index;
+  };
+
+  void UnitTest_PrefixSumSolution() {
+    std::vector<WeightObjectPtr> objects = {std::make_shared<WeightObject>("apple",4),
+                                            std::make_shared<WeightObject>("orange",2),
+                                            std::make_shared<WeightObject>("lemon",1)};
+  
+    PrefixSum prefix_sum(objects);
+    for (int i=0;i<10;++i) {
+      WeightObjectPtr node = prefix_sum.GetRandom();
+      std::cout <<node->m_label<<std::endl;
+    }
+
+    std::cout << "#### Update ####" << std::endl;
+    prefix_sum.Update(objects[1],4);
+    for (int i=0;i<10;++i) {
+      WeightObjectPtr node = prefix_sum.GetRandom();
+      std::cout <<node->m_label<<std::endl;
+    }
+
+    std::cout << "#### Remove ####" << std::endl;
+    prefix_sum.Remove(objects[1]);
+    for (int i=0;i<10;++i) {
+      WeightObjectPtr node = prefix_sum.GetRandom();
+      std::cout <<node->m_label<<std::endl;
+    }
+  }
+}
+
+int main() {
+  PrefixSumSolution::UnitTest_PrefixSumSolution();
   return 0;
 }
