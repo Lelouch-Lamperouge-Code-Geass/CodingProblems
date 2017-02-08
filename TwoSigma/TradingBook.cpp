@@ -9,155 +9,181 @@
   (2) Delete(symbol_id)
 */
 #include <iostream>
-#include <unordered_map>
-#include <string>
 #include <memory>
+#include <unordered_map>
 #include <stack>
 #include <cassert>
-#include <iostream>
 
-class BstTreeNode;
-typedef std::shared_ptr<BstTreeNode> BstTreeNodePtr;
+class OrderNode;
+typedef std::shared_ptr<OrderNode> OrderNodePtr;
 
-class BstTreeNode {
- public:
-  BstTreeNode(float price, long quantity)
-      : m_price(price), m_quantity(quantity) {}
-
- private:
-  friend class BstTree;
-  // double have much better precision than float, but in general stock price
-  // will only have
-  // less than 3 decimal digits.
-  float m_price;
-  // I would say long is good enough, its maximum value are just more than 2
-  // billion.
-  // You can switch to unsigned long if you want.
-  long m_quantity;
-
-  BstTreeNodePtr m_left, m_right;
+// similar to TRADE Node
+class OrderNode {
+  friend class OrderTree;
+public:
+  OrderNode(const std::string & order_id, double price, std::size_t quantity)
+    : m_order_id(order_id), m_price(price), m_quantity(quantity),m_left(nullptr),m_right(nullptr){}
+private:
+  std::string m_order_id;
+  double m_price;
+  std::size_t m_quantity;
+  OrderNodePtr m_left;
+  OrderNodePtr m_right;
 };
 
-class BstTree {
- public:
-  BstTree() : m_root(new BstTreeNode(0, 0)) {}
-  void AddNode(float price, long quantity) {
-    BstTreeNodePtr curr(m_root), parent;
+class OrderTree {
+public:
+  OrderTree(){
+    m_root = std::make_shared<OrderNode>("",0,0);
+  }
+  void AddOrderNode(const OrderNodePtr & node) {
+    OrderNodePtr curr(m_root), parent(nullptr);
     while (curr) {
       parent = curr;
-      if (curr->m_price == price) {
-        curr->m_quantity += quantity;
-        return;
-      } else if (curr->m_price > price) {
+      if (node->m_price < curr->m_price) {
         curr = curr->m_left;
       } else {
         curr = curr->m_right;
       }
     }
-
-    if (parent->m_price > price)
-      parent->m_left = std::make_shared<BstTreeNode>(price, quantity);
-    else
-      parent->m_right = std::make_shared<BstTreeNode>(price, quantity);
-  }
-  float GetMinSellPrice() {
-    return m_root->m_right ? m_root->m_right->m_price : 0;
+// add trade node to the tree
+    if (node->m_price < parent->m_price) {
+      parent->m_left = node;
+    } else {
+      parent->m_right = node;
+    }
   }
 
-  float GetMaxBuyPrice() {
-    BstTreeNodePtr curr(m_root);
+  double GetMinSellPrice() const {
+    return m_root->m_right ? m_root->m_right->m_price : 0;    
+  }
+
+  double GetMaxBuyPrice() const {
+    OrderNodePtr curr(m_root);
     while (curr->m_left) {
       curr = curr->m_left;
     }
     return curr->m_price;
   }
-
-  // Need use double here, total cost coulbe be more than 2 billion.
-  // Very rare, but can't rule out that possibility.
-  double GetTotalCost() {
-    BstTreeNodePtr curr(m_root->m_left);
-    if (!curr) return 0;
+double GetTotalCost(std::size_t quantity) const {
+    if ( !m_root->m_right ) return 0;
+    
+    // Begin in-order-traversal for right tree of root node
     double reval(0);
-    std::stack<BstTreeNodePtr> my_stack;
-    my_stack.push(curr);
-    while (!my_stack.empty()) {
-      curr = my_stack.top();
-      reval += (curr->m_price * curr->m_quantity);
-      my_stack.pop();
-      if(curr->m_left)my_stack.push(curr->m_left);
-      if(curr->m_right)my_stack.push(curr->m_right);
+    OrderNodePtr curr(m_root->m_right);
+    std::stack<OrderNodePtr> m_stack;
+    m_stack.push(curr);
+    while ( !m_stack.empty() && quantity != 0 ) {
+      if (m_stack.top()->m_left) {
+        m_stack.push(m_stack.top()->m_left);
+      } else {
+        curr = m_stack.top();
+        std::size_t need = std::min(quantity, curr->m_quantity);
+        reval += curr->m_price * need;
+        quantity -= need;
+        m_stack.pop();
+        if (curr->m_right) m_stack.push(curr->m_right);
+      }
     }
-    return reval;
+    // This depends on discussion.
+    // What if asked quantity is more than all the quantity being sold by others, rarely happen though.
+    return quantity == 0 ? reval : 0;
   }
- private:
-  BstTreeNodePtr m_root;
+  
+private:
+  OrderNodePtr m_root;
 };
 
-typedef std::shared_ptr<BstTree> BstTreePtr;
+typedef std::shared_ptr<OrderTree> OrderTreePtr;
 
-enum TradeType {
+enum OrderType{
   BUY,
   SELL
 };
-class TradeBook {
- public:
-  TradeBook() {}
-  void AddTrade(const std::string& symbol, const std::string& company,
-                float price, const long quantity, const TradeType& trade_type) {
-    if (m_company_price_mapper.count(company) == 0) {
-      m_company_price_mapper[company] = std::make_shared<BstTree>();
-      m_symbol_company_mapper[symbol] = company;
-    }
-    if (trade_type == BUY) price = -price;
-    m_company_price_mapper[company]->AddNode(price, quantity);
-  }
 
-  void Delete(const std::string& symbol) {
-    if (m_symbol_company_mapper.count(symbol) == 0) return;
-    const std::string company(m_symbol_company_mapper[symbol]);
-    m_company_price_mapper.erase(company);
-    m_symbol_company_mapper.erase(symbol);
-  }
+class OrderBook {
+public:
+  OrderBook() {}
+ 
+  void AddOrder(const std::string & order_id,
+           const std::string & company,
+           double price,
+           std::size_t quantity,
+           const OrderType & order_type);
+  
+  double GetMinSellPrice(const std::string & company);
+  
+  double GetMaxBuyPrice(const std::string & company);
 
-  float GetMinSellPrice(const std::string& company) {
-    if (m_company_price_mapper.count(company) == 0) return 0;
-    return m_company_price_mapper[company]->GetMinSellPrice();
-  }
-
-  float GetMaxBuyPrice(const std::string& company) {
-    if (m_company_price_mapper.count(company) == 0) return 0;
-    return  - m_company_price_mapper[company]->GetMaxBuyPrice();
-  }
-
-  double GetTotalCost(const std::string & company) {
-    if (m_company_price_mapper.count(company) == 0) return 0;
-    return  - m_company_price_mapper[company]->GetTotalCost();
-  }
- private:
-  std::unordered_map<std::string, std::string> m_symbol_company_mapper;
-  std::unordered_map<std::string, BstTreePtr> m_company_price_mapper;
+  double GetTotalCost(const std::string & company,std::size_t quantity);
+  
+  void Delete(const std::string & order_id);
+private:
+  std::unordered_map<std::string, OrderTreePtr> m_company_to_order_tree;
+  std::unordered_map<std::string, OrderNodePtr> m_order_id_to_trade;
 };
 
-void UnitTest_TradeBook() {
-  TradeBook trade_book;
-  trade_book.AddTrade("GOOGL", "GOOGLE", 507.80, 20, BUY);
-  trade_book.AddTrade("GOOGL", "GOOGLE", 601.20, 50, BUY);
-  trade_book.AddTrade("GOOGL", "GOOGLE", 307.80, 100, BUY);
-  trade_book.AddTrade("GOOGL", "GOOGLE", 717.35, 30, SELL);
-  trade_book.AddTrade("GOOGL", "GOOGLE", 866.80, 40, SELL);
-
-  std::cout << trade_book.GetMinSellPrice("GOOGLE") << std::endl;
-  std::cout << trade_book.GetMaxBuyPrice("GOOGLE") << std::endl;
-  std::cout << trade_book.GetTotalCost("GOOGLE") << std::endl;
-
-  trade_book.AddTrade("FB", "FACEBOOK", 36.3, 2000, BUY);
-  trade_book.AddTrade("FB", "FACEBOOK", 44.7, 4000, BUY);
-  trade_book.AddTrade("FB", "FACEBOOK", 83.92, 1000, SELL);
-  std::cout << trade_book.GetMaxBuyPrice("FACEBOOK") << std::endl;
-  trade_book.Delete("FB");
-  std::cout << trade_book.GetMaxBuyPrice("FACEBOOK") << std::endl;
+void  OrderBook:: AddOrder(const std::string & order_id,
+                      const std::string & company,
+                      double price,
+                      std::size_t quantity,
+                      const OrderType & order_type){
+  if ( m_company_to_order_tree.count(company) == 0 ) {
+    m_company_to_order_tree[company] = std::make_shared<OrderTree>();
+  }
+  if (order_type == BUY) price = 0 - price; // make it negative for buying order
+  OrderNodePtr new_trade = std::make_shared<OrderNode>(order_id, price, quantity);
+  m_company_to_order_tree[company]->AddOrderNode(new_trade);
 }
+
+double OrderBook::GetMinSellPrice(const std::string & company){
+  if (m_company_to_order_tree.count(company) == 0) {
+    return 0;
+  } else {
+    return m_company_to_order_tree[company]->GetMinSellPrice();
+  }
+}
+
+double OrderBook::GetMaxBuyPrice(const std::string & company){
+  if (m_company_to_order_tree.count(company) == 0) {
+    return 0;
+  } else {
+    return m_company_to_order_tree[company]->GetMaxBuyPrice();
+  }
+}
+
+double OrderBook::GetTotalCost(const std::string & company, std::size_t quantity){
+  if (m_company_to_order_tree.count(company) == 0) {
+    return 0;
+  } else {
+    return m_company_to_order_tree[company]->GetTotalCost(quantity);
+  }
+}
+
+
+void UnitTest_OrderBook() {
+  OrderBook order_book;
+  order_book.AddOrder("GOOGL", "GOOGLE", 507.80, 20, BUY);
+  order_book.AddOrder("GOOGL", "GOOGLE", 601.20, 50, BUY);
+  order_book.AddOrder("GOOGL", "GOOGLE", 307.80, 100, BUY);
+  order_book.AddOrder("GOOGL", "GOOGLE", 717.35, 30, SELL);
+  order_book.AddOrder("GOOGL", "GOOGLE", 866.80, 40, SELL);
+
+  assert(order_book.GetMinSellPrice("GOOGLE") == 717.35);
+  assert(order_book.GetMaxBuyPrice("GOOGLE") == -601.2);
+  assert(order_book.GetTotalCost("GOOGLE",40) == 717.35 * 30 + 866.80 * 10);
+  
+  order_book.AddOrder("FB", "FACEBOOK", 36.3, 2000, BUY);
+  order_book.AddOrder("FB", "FACEBOOK", 44.7, 4000, BUY);
+  order_book.AddOrder("FB", "FACEBOOK", 83.92, 1000, SELL);
+  assert(order_book.GetMaxBuyPrice("FACEBOOK") == -44.7);
+  
+  // order_book.Delete("FB");
+  //std::cout << order_book.GetMaxBuyPrice("FACEBOOK") << std::endl;
+}
+
 int main() {
-  UnitTest_TradeBook();
+  UnitTest_OrderBook();
   return 0;
 }
+
