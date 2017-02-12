@@ -15,146 +15,172 @@ The term parse tree itself is used primarily in computational linguistics; in th
 the term syntax tree is more common. Parse trees are distinct from the abstract syntax trees used in computer programming, 
 in that their structure and elements more concretely reflect the syntax of the input language. 
 */
-class IExpression {
-public:
-	virtual double Interpret() { return 0;}
-	~IExpression(){}
-};
-typedef std::shared_ptr<IExpression> IExpressionPtr;
-
-class NumberExpression : public IExpression {
-public:
-	NumberExpression(const double val) : m_value(val){}
-	virtual double Interpret() {return m_value;}
-private:
-	double m_value;
-};
-typedef std::shared_ptr<NumberExpression> NumberExpressionPtr;
-
-class AddExpression : public IExpression {
-public:
-	AddExpression(const IExpressionPtr & left, const IExpressionPtr & right) : m_left(left),m_right(right){
-	}
-	virtual double Interpret() { return m_left->Interpret() + m_right->Interpret();}
-private:
-	IExpressionPtr m_left;
-	IExpressionPtr m_right;
-};
-class SubExpression : public IExpression {
-public:
-	SubExpression(const IExpressionPtr & left, const IExpressionPtr & right) : m_left(left),m_right(right){
-	}
-	virtual double Interpret() { return m_left->Interpret() - m_right->Interpret();}
-private:
-	IExpressionPtr m_left;
-	IExpressionPtr m_right;
-};
-class MulExpression : public IExpression {
-public:
-	MulExpression(const IExpressionPtr & left, const IExpressionPtr & right) : m_left(left),m_right(right){
-	}
-	virtual double Interpret() { return m_left->Interpret() * m_right->Interpret();}
-private:
-	IExpressionPtr m_left;
-	IExpressionPtr m_right;
-};
-class DivExpression : public IExpression {
-public:
-	DivExpression(const IExpressionPtr & left, const IExpressionPtr & right) : m_left(left),m_right(right){
-	}
-	virtual double Interpret() { return m_left->Interpret() / m_right->Interpret();}
-private:
-	IExpressionPtr m_left;
-	IExpressionPtr m_right;
-};
-
-// Singleton Design Pattern 
-class OperatorFactory {
-public:
-	static OperatorFactory & Instance() {
-		static OperatorFactory instance;
-		return instance;
-	}
-	bool IsOperator(const char c) const {
-		return m_operators.find(c) !=m_operators.end();
-	}
-	std::shared_ptr<IExpression> GetOperator(const char  c, const IExpressionPtr & left, const IExpressionPtr & right) const {
-		switch (c) {
-		case '+' : return std::make_shared<AddExpression>(left,right);
-		case '-' : return std::make_shared<SubExpression>(left,right);
-		case '*' : return std::make_shared<MulExpression>(left,right);
-		case '/' : return std::make_shared<DivExpression>(left,right);
-		default:
-			throw invalid_argument ("Invalid operator");
-		}
-	}
-private:
-	OperatorFactory() {
-		m_operators.insert('+');
-		m_operators.insert('-');
-		m_operators.insert('*');
-		m_operators.insert('/');
-	}
-
-	unordered_set<char> m_operators;
-};
+#include <unordered_map>
+#include <iostream>
+#include <vector>
+#include <memory>
+#include <cassert>
 
 class Token {
 public:
-	Token(const std::string & text) {m_text = text;}
-	string m_text;
+  virtual ~Token(){}
 };
 
-class Tokenizer {
+
+class Operand : public Token {
 public:
-	Tokenizer(const std::string & str) {
-		std::istringstream iss(str);
-		string temp("");
-		while (std::getline(iss,temp,',')) {
-			m_tokens.push_back(Token(temp));
-		}
-	}
-	bool HasNext() {return !m_tokens.empty();}
-	Token NextToken() {Token token = m_tokens.front();m_tokens.pop_front();return token; }
+  Operand(double val) : m_value(val) {}
+  virtual ~Operand(){}
+  void SetValue(double val) { m_value = val; }
+  double GetValue() const { return m_value; }
 private:
-	std::list<Token> m_tokens;
+  double m_value;
+};
+typedef std::shared_ptr<Operand> OperandPtr;
+
+class Operator : public Token {
+public:
+  virtual ~Operator() {}
+  virtual void Execute(std::vector<OperandPtr> & operands) = 0;
+};
+typedef std::shared_ptr<Operator> OperatorPtr;
+
+class Add : public Operator {
+public:
+  virtual void Execute(std::vector<OperandPtr> & operands) {
+    OperandPtr curr = operands.back();
+    operands.pop_back();
+    operands.back()->SetValue( operands.back()->GetValue() + curr->GetValue() );
+  }
+};
+
+class Sub : public Operator {
+public:
+  virtual void Execute(std::vector<OperandPtr> & operands) {
+    OperandPtr curr = operands.back();
+    operands.pop_back();
+    operands.back()->SetValue( operands.back()->GetValue() - curr->GetValue() );
+  }
+};
+
+class Mul : public Operator {
+public:
+  virtual void Execute(std::vector<OperandPtr> & operands) {
+    OperandPtr curr = operands.back();
+    operands.pop_back();
+    operands.back()->SetValue( operands.back()->GetValue() * curr->GetValue() );
+  }
+};
+
+class Div : public Operator {
+public:
+  virtual void Execute(std::vector<OperandPtr> & operands) {
+    OperandPtr curr = operands.back();
+    operands.pop_back();
+    operands.back()->SetValue( operands.back()->GetValue() / curr->GetValue() );
+  }
+};
+
+class OperatorCreator {
+public:
+  virtual ~OperatorCreator(){}
+  virtual OperatorPtr Create() = 0;
+};
+typedef std::shared_ptr<OperatorCreator> OperatorCreatorPtr;
+
+class AddCreator : public OperatorCreator {
+public:
+  virtual OperatorPtr Create() {
+    OperatorPtr reval = std::make_shared<Add>();
+    return reval;
+  }
+};
+
+class SubCreator : public OperatorCreator {
+public:
+  virtual OperatorPtr Create() {
+    OperatorPtr reval = std::make_shared<Sub>();
+    return reval;
+  }
+};
+
+class MulCreator : public OperatorCreator {
+public:
+  virtual OperatorPtr Create() {
+    OperatorPtr reval = std::make_shared<Mul>();
+    return reval;
+  }
+};
+
+class DivCreator : public OperatorCreator {
+public:
+  virtual OperatorPtr Create() {
+    OperatorPtr reval = std::make_shared<Div>();
+    return reval;
+  }
+};
+
+class OperatorFactory {
+public:
+  bool IsOperator(const std::string & str) const {
+    return m_mapper.count(str) != 0;
+  }
+
+  OperatorPtr GetOperator(const std::string & str) {
+    if (!IsOperator(str)) {
+      return nullptr;
+    } else {
+      return m_mapper[str]->Create();
+    }
+  }
+
+  void RegisterOperator(const std::string & str, OperatorCreatorPtr & creator) {
+    if (str.empty() || !creator) return;
+    m_mapper[str] = creator;
+  }
+
+private:
+  std::unordered_map<std::string, OperatorCreatorPtr> m_mapper;
 };
 
 class Calculator {
-	
 public:
-	Calculator(){}
-	double Calculate(Tokenizer & tokenizer) {
-		const OperatorFactory & op_factory = OperatorFactory::Instance();
-		while (tokenizer.HasNext()) {
-			const Token & cur_token = tokenizer.NextToken();
-			if ( op_factory.IsOperator(cur_token.m_text[0]) ) {
-				IExpressionPtr right = m_operands.top();
-				m_operands.pop();
-				IExpressionPtr left = m_operands.top();
-				m_operands.pop();
-				std::shared_ptr<IExpression> op = op_factory.GetOperator(cur_token.m_text[0],left,right);
-				m_operands.push( std::make_shared<NumberExpression>(op->Interpret()));
-			} else {
-				m_operands.push( std::make_shared<NumberExpression>(std::stod(cur_token.m_text) ) ) ;
-			}
-		}
-		return m_operands.top()->Interpret();
-	}
-private:
-	std::stack< NumberExpressionPtr > m_operands;
+  double Calculate(const std::vector<std::string> & strs) const {
+    OperatorCreatorPtr add_creator = std::make_shared<AddCreator>();
+    OperatorCreatorPtr sub_creator = std::make_shared<SubCreator>();
+    OperatorCreatorPtr mul_creator = std::make_shared<MulCreator>();
+    OperatorCreatorPtr div_creator = std::make_shared<DivCreator>();
+
+    OperatorFactory operator_factory;
+    operator_factory.RegisterOperator("+",add_creator);
+    operator_factory.RegisterOperator("-",sub_creator);
+    operator_factory.RegisterOperator("*",mul_creator);
+    operator_factory.RegisterOperator("/",div_creator);
+
+    std::vector<OperandPtr> operands;
+    for (const std::string & str : strs) {
+      if (operator_factory.IsOperator(str)) {
+        OperatorPtr cur_operator = operator_factory.GetOperator(str);
+        cur_operator->Execute(operands);
+      } else {
+        operands.push_back( std::make_shared<Operand>(std::stod(str)) );
+      }
+    }
+    return operands.back()->GetValue();
+  }
 };
 
-int _tmain(int argc, _TCHAR* argv[])
-{
-	Tokenizer tk("4,3,2,-,1,+,*");
-	Calculator cal;
-	double value = cal.Calculate(tk);
-	assert(value==8);
+void UnitTest() {
+  Calculator calculator;
+  std::vector<std::string> tokens = {"3","2","-"};
+  assert(calculator.Calculate(tokens) == 1);
 
-	Tokenizer tk2("3,2,5,/,+,2,4,*,-");//3+2/5-2*4
-	value = cal.Calculate(tk2);
-	assert(value==-4.6);
-	return 0;
+  tokens = {"3","2","5","/","+","2","4","*","-"};
+  assert(calculator.Calculate(tokens) == -4.6);
 }
 
+
+int main() {
+  UnitTest();
+  return 0;
+}
