@@ -27,31 +27,54 @@ Thus, at the next step of the simulation, the state would be: 00011101
 #include <sstream>
 
 void OneDimensionGameOfLife(std::vector<int> & board) {
-  const int board_size(board.size());
-  for (int i=0;i<board_size;++i) {
-    int left = (i==0? board_size-1 : i-1);
-    int right = (i==board_size-1? 0 : i+1);
-    if ( (board[left]&1) + (board[right]&1) == 1) board[i] += ((board[i]^1) << 1);
-    else board[i] += (board[i]<<1);
+  const std::size_t board_size(board.size());
+  for (std::size_t i = 0; i < board_size; ++i) {
+    std::size_t left = ( i == 0 ? board_size - 1 : i - 1 );
+    std::size_t right = ( i == board_size - 1 ? 0 : i + 1);
+    int live_neighbor = (board[left] & 1) + (board[right] & 1);
+    if (live_neighbor != 1) { // not change status
+      board[i] += (board[i]<<1);
+    } else { // change status
+      if (board[i]==0) board[i] = 2 ;
+      // no need for board[i]==1, since it is 00001;
+    }
   }
 
-  for (int & cell : board) {
-    cell >>= 1;
+  for (int & val : board) {
+    val >>= 1;
   }
 }
 
-void UnitTest_OneDimensionGameOfLife() {
-  int arr[] = {0,1,1,0,0,1,0,1};
-  std::vector<int> board(std::begin(arr),std::end(arr));
+
+void UnitTest() {
+  std::vector<int> board = {0,1,1,0,0,1,0,1};
   OneDimensionGameOfLife(board);
   std::ostringstream oss;
   for (int num : board) {
     oss <<num;
   }
   assert(oss.str()=="00011101");
+
+  board = {0,1,0,0,1,0};
+  OneDimensionGameOfLife(board);
+  oss.str("");
+  for (int num : board) {
+    oss <<num;
+  }
+  assert(oss.str() == "111111");
+
+  board = {0,1,1,0,1,0,1,0,0,0,1,1,1,0,1,1,0,1,1,0};
+  OneDimensionGameOfLife(board);
+  oss.str("");
+  for (int num : board) {
+    oss <<num;
+  }
+
+  assert(oss.str() == "10001011010100000001");
 }
 
 int main() {
-  UnitTest_OneDimensionGameOfLife();
+  UnitTest();
   return 0;
 }
+
