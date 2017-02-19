@@ -16,15 +16,18 @@ output = [imgood]
 #include <cassert>
 
 
-int LongestConsecutiveCommonSubstringLength(const std::string & word1, const std::string & word2) {
-  const std::size_t word1_size(word1.size()), word2_size(word2.size());
-  // This matrix stores the max common string length including that char
-  int reval(0);
-  std::vector< std::vector<int> > max_len(word1_size+1,std::vector<int>(word2_size+1,0));
-  for (int i=1;i<=word1_size;++i) {
-    for (int j=1;j<=word2_size;++j) {
-      max_len[i][j] = (word1[i-1]!=word2[j-1]? max_len[i-1][j-1] : 1+ max_len[i-1][j-1]);
-      reval = std::max(reval,max_len[i][j]);
+std::size_t LongestCommonString(const std::string & left, const std::string & right) {
+  const std::size_t row_size(left.size()), col_size(right.size());
+  std::size_t reval(0);
+  std::vector< std::vector<std::size_t> > longest_include_curr( row_size+1, std::vector<std::size_t>(col_size+1, 0) );
+  for (std::size_t i=1; i<=row_size; ++i) {
+    for (std::size_t j=1; j<=col_size; ++j) {
+      if (left[i-1] == right[j-1]) {
+        longest_include_curr[i][j] = longest_include_curr[i-1][j-1] + 1;
+      } else {
+        longest_include_curr[i][j] = 0;
+      }
+      reval = std::max(reval, longest_include_curr[i][j]);
     }
   }
   return reval;
