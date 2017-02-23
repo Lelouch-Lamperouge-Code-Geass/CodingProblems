@@ -92,3 +92,27 @@ By optimizing your code (including removing spaces, commas, and other unnecessar
 * DB Replication : For typical web application where the read/write ratio is high, it will be useful to maintain multiple read-only replicas so that read access workload can be spread across. For example, in a 1 master/N slaves case, all update goes to master DB which send a change log to the replicas. However, there will be a time lag for replication.
 * Table Partitioning : You can partition vertically or horizontally. Vertical partitioning is about putting different DB tables into different machines or moving some columns (rarely access attributes) to a different table. Of course, for query performance reason, tables that are joined together inside a query need to reside in the same DB.Horizontally partitioning is about moving different rows within a table into a separated DB. For example, we can partition the rows according to user id. Locality of reference is very important, we should put the rows (from different tables) of the same user together in the same machine if these information will be access together.
 * Transaction Processing : Avoid mixing OLAP (query intensive) and OLTP (update intensive) operations within the same DB. In the OLTP system, avoid using long running database transaction and choose the isolation level appropriately. A typical technique is to use optimistic business transaction. Under this scheme, a long running business transaction is executed outside a database transaction. Data containing a version stamp is read outside the database trsnaction. When the user commits the business transaction, a database transaction is started at that time, the lastest version stamp of the corresponding records is re-read from the DB to make sure it is the same as the previous read (which means the data is not modified since the last read). Is so, the changes is pushed to the DB and transaction is commited (with the version stamp advanced). In case the version stamp is mismatched, the DB transaction as well as the business transaction is aborted.
+
+
+#### Database structure is not well defined/normalized
+This is probably known to everybody that the database tables should be properly normalized as this is part of every DBMS course at graduation level. If the tables are not properly designed and normalized, anomalies set in.
+
+#### Proper caching is not in place
+Many applications make use of temporary caches on the application server to store the reference data or frequently accessed data as memory is less of an issue than the time with new generation servers.
+
+#### Number of rows in the table too large
+If the table itself has too much of data then the queries will take time to execute. Partitioning a table into multiple tables is recommended in these situations. For example: If a table has employee records of 1000000 employees then it could be split into 5 small tables each having 200000 rows. The advantage is we know beforehand in which smaller table to look for a particular employee code as the division of large table can be done on the employee id column.
+
+####  Connections are not being pooled
+If connections are not pooled then the each time a new connection is requested for a request to database. Maintaining a connection pool is much better than creating and destroying the connection for executing every SQL query.
+Connections not closed/returned to pool in case of exceptions: When an exception occurs while performing database operations, it ought to be caught. Usually catching the exception is not the issue because SQLException is a checked exception but closing the connection is something that most of the times is left out. If the connection is not released, the same connection cannot be used for any other purpose till the connection is timed out.
+
+
+
+
+
+
+
+
+
+
