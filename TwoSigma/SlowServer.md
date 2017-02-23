@@ -32,9 +32,7 @@ You should also test whether the slowness is limited to specific web pages, or i
 
 #### Enable compression 
 The time it takes to transfer an HTTP request and response across the network can be significantly reduced by decisions made by front-end engineers. It's true that the end-user's bandwidth speed, Internet service provider, proximity to peering exchange points, etc. are beyond the control of the development team. But there are other variables that affect response times. Compression reduces response times by reducing the size of the HTTP response. Gzip is the most popular and effective compression method at this time. There are known issues with browsers and proxies that may cause a mismatch in what the browser expects and what it receives with regard to compressed content. Fortunately, these edge cases are dwindling as the use of older browsers drops off. The Apache modules help out by adding appropriate Vary response headers automatically.Servers choose what to gzip based on file type, but are typically too limited in what they decide to compress. Most web sites gzip their HTML documents. It's also worthwhile to gzip your scripts and stylesheets, but many web sites miss this opportunity. In fact, it's worthwhile to compress any text response including XML and JSON. Image and PDF files should not be gzipped because they are already compressed. Trying to gzip them not only wastes CPU but can potentially increase file sizes.Gzipping as many file types as possible is an easy way to reduce page weight and accelerate the user experience.
- 
-#### Minify CSS, JavaScript, and HTML 
-By optimizing your code (including removing spaces, commas, and other unnecessary characters), you can dramatically increase your page speed. 
+
 #### Reduce redirects 
 Each time a page redirects to another page, your visitor faces additional time waiting for the HTTP request-response cycle to complete. For example, if your mobile redirect pattern looks like this: "example.com -> www.example.com -> m.example.com -> m.example.com/home," each of those two additional redirects makes your page load slower.
 #### Minimize HTTP Requests 
@@ -77,11 +75,13 @@ Obfuscation is an alternative optimization that can be applied to source code. I
 
 In addition to minifying external scripts and styles, inlined <script> and <style> blocks can and should also be minified. Even if you gzip your scripts and styles, minifying them will still reduce the size by 5% or more. As the use and size of JavaScript and CSS increases, so will the savings gained by minifying your code.
 
-
 #### Make Ajax Cacheable
 One of the cited benefits of Ajax is that it provides instantaneous feedback to the user because it requests information asynchronously from the backend web server. However, using Ajax is no guarantee that the user won't be twiddling his thumbs waiting for those asynchronous JavaScript and XML responses to return. In many applications, whether or not the user is kept waiting depends on how Ajax is used. For example, in a web-based email client the user will be kept waiting for the results of an Ajax request to find all the email messages that match their search criteria. It's important to remember that "asynchronous" does not imply "instantaneous".
 
 To improve performance, it's important to optimize these Ajax responses. The most important way to improve the performance of Ajax is to make the responses cacheable.
+
+#### Minify CSS, JavaScript, and HTML 
+By optimizing your code (including removing spaces, commas, and other unnecessary characters), you can dramatically increase your page speed. 
 
 
 ## Database Problems
