@@ -16,7 +16,11 @@ enum OrderType{
 class Order {
 
 public:
-  Order(const std::string & order_id, const std::string & company,  const OrderType  order_type, double price, std::size_t quantity)
+  Order(const std::string & order_id, 
+        const std::string & company,  
+        const OrderType  order_type, 
+        double price, 
+        std::size_t quantity)
     : m_order_id(order_id), m_company(company), m_order_type(order_type),  m_price(price), m_quantity(quantity) {}
 
   std::string m_order_id;
@@ -99,6 +103,7 @@ typedef std::shared_ptr<OrderList> OrderListPtr;
 class OrderBook {
 public:
   OrderBook(){}
+  // add a trading order
   void AddOrder(const std::string & order_id,
            const std::string & company,
            double price,
@@ -117,18 +122,23 @@ public:
     m_company_to_order_list[company]->AddOrder(order_ptr);
     m_order_id_to_order[order_id] = order_ptr;
   }
+  
+  // return the min sell price of a share
   double GetMinSellPrice(const std::string & company) {
     return m_company_to_order_list.count(company) == 0 ? 0 : m_company_to_order_list[company]->GetMinSellPrice();
   }
 
+  // return the max buy price of a share
   double GetMaxBuyPrice(const std::string & company) {
     return m_company_to_order_list.count(company) == 0 ? 0 : m_company_to_order_list[company]->GetMaxBuyPrice();
   }
 
+  // return the total cost to buy xxx shares of a company
   double GetTotalCost(const std::string & company, std::size_t quantity) {
     return m_company_to_order_list.count(company) == 0 ? 0 : m_company_to_order_list[company]->GetTotalCost(quantity);
   }
 
+  // cancel a trading order
   void Delete(const std::string & order_id) {
     if (m_order_id_to_order.count(order_id) != 0) {
       OrderPtr order_ptr = m_order_id_to_order[order_id];
