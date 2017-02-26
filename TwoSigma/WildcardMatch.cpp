@@ -62,6 +62,8 @@ namespace TwoPointerSolution {
     std::size_t str_index(0),pattern_index(0);
     std::size_t str_marker(-1),pattern_marker(-1);
 
+    // Notice that there is a concealed scenario here, when pattern_index == pattern.size()
+    // we accessed pattern[pattern_index] as well. Of course, it will be a mismatch.
     while (str_index < str_size) {
       if (pattern[pattern_index]=='*') {
         // mark where * appears
