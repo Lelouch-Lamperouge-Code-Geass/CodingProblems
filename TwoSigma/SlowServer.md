@@ -85,6 +85,30 @@ To improve performance, it's important to optimize these Ajax responses. The mos
 #### Minify CSS, JavaScript, and HTML 
 By optimizing your code (including removing spaces, commas, and other unnecessary characters), you can dramatically increase your page speed. 
 
+## Application Problems
+
+#### No/Poor Load Distribution
+Poor load distribution can cause slow response times by incorrectly assigning new site visitors to bogged-down servers instead of others with cycles to spare. If too many people are on the same server, they’re going to experience problems, even if the overall system is well under capacity. It is imperative to test with a product like NeoLoad as it will help you find any infrastructural weaknesses at hand.
+
+#### Lack of caching or inefficient caching. 
+In many situations, application or perimeter caching can improve Web services performance. Caching-related issues that can significantly affect Web services performance include failure to use caching for Web methods, caching too much data, caching inappropriate data, and using inappropriate expiration settings.
+
+#### Inefficient state management. 
+Inefficient state management design in Web services can lead to scalability bottlenecks because the server becomes overloaded with state information that it must maintain on a per-user basis. Common pitfalls for Web services state management include using stateful Web methods, using cookie containerbased state management, and choosing an inappropriate state store. The most scalable Web services maintain no state.
+
+#### Misuse of threads. 
+It is easy to misuse threads. For example, you might create threads on a per-request basis or you might write code that misuses the thread pool. Also, unnecessarily implementing a Web method asynchronously can cause more worker threads to be used and blocked, which affects the performance of the Web server.
+On the client side, consumers of Web services have the option of calling Web services asynchronously or synchronously. Your code should call a Web service asynchronously only when you want to avoid blocking the client while a Web service call is in progress. If you are not careful, you can use a greater number of worker and I/O threads, which negatively affects performance. It is also slower to call a service asynchronously; therefore, you should avoid doing so unless your client application needs to do something else while the service is invoked.
+
+#### Serialization
+The amount of serialization that is required for your Web method requests and responses is a significant factor for overall Web services performance. Serialization overhead affects network congestion, memory consumption, and processor utilization. To help keep the serialization overhead to a minimum:
+* Reduce serialization.
+* Reduce round trips.
+* Consider XML compression.
+
+Reducing round trips to a Web service reduces the number of times that messages need to cross serialization boundaries. This helps reduce the overall serialization cost incurred. Design options that help to reduce round trips include the following:
+Use message-based interaction with a message-based programming model, rather than an RPC style that requires multiple object interactions to complete a single logical unit of work.
+In some cases, split a large payload into multiple calls to the Web service. Consider making the calls in parallel using asynchronous invocation instead of in series. This does not technically reduce the total number of round trips, but in essence the client waits for only a single round trip.
 
 ## Database Problems
 * Indexing : Make sure appropriate indexes is built for fast access. Analyze the frequently-used queries and examine the query plan when it is executed (e.g. use "explain" for MySQL). Check whether appropriate index exist and being used.
