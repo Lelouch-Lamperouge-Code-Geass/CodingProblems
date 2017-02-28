@@ -1,73 +1,95 @@
 #include <iostream>
 #include <cassert>
 
-bool IsPalindrome(const std::string & str,
-                  std::size_t left,
-                  std::size_t right) {
-  bool reval(true);
-  while(left<right) {
-    if (str[left]!=str[right]) {
-      reval = false;
-      break;
-    } else {
-      ++ left;
-      -- right;
-    }
+class PalindromeChecker {
+public:
+
+  PalindromeChecker() : m_prime(103), m_base(256),  m_left_hash(1), m_right_hash(1), m_half_base(1), m_str("") {
+
   }
-  return reval;
-}
 
-std::string CheckPalindrome(const std::string & str) {
-  static int prime(103), base(256);
-  
-  std::string reval("");
-  if (str.empty()) return reval;
-  
-  reval.push_back('Y');
-  if (str.size() == 1) return reval;
-
-  // left_hash represents the hash value of reversed left string
-  int left_hash(str[0] % prime), right_hash(str[1] % prime);
-
-  // since left_hash is the hash value of reversed left string,
-  // every time we need to add a char at the begin of the reversed-left-string.
-  int left_highest_base(1);
-  
-  const std::size_t str_size(str.size());
-  for (std::size_t i = 1; i < str_size; ++i) {
-    if (left_hash != right_hash) {
-      reval.push_back('N');
-    } else {
-      reval.push_back( (IsPalindrome(str,0,i) ? 'Y' : 'N') );
+  static bool IsPalindrome(const std::string & str,
+                           std::size_t left,
+                           std::size_t right) {
+    bool reval(true);
+    while(left<right) {
+      if (str[left]!=str[right]) {
+        reval = false;
+        break;
+      } else {
+        ++ left;
+        -- right;
+      }
     }
-
-    if (i % 2 == 1) {
-      // remove head of right hash
-      right_hash = (right_hash + prime - str[(i+1)/2] * left_highest_base);
-      // add next char to right hash,
-      // the therotical form is `(righ t* base + str[i+1]) % prime`,
-      // but we want to prevent overflow here
-      right_hash = ( (right_hash * base) % prime + str[i+1]) % prime;
-    } else {
-      // increase the highest base of left_hash
-      left_highest_base = (left_highest_base * base) % prime;
-
-      // append mid char to left hash
-      left_hash = ( str[i/2] * left_highest_base + left_hash) % prime;
-
-      // add the next char to right hash
-      right_hash = ( (right_hash * base) % prime + str[i+1]) % prime;
-    }
+    return reval;
   }
-  return reval;
-}
+
+  std::string Check(char new_char) {
+    m_str.push_back(new_char);
+    const std::size_t cur_size = m_str.size();
+    if (cur_size == 1) {
+      m_left_hash = m_right_hash = m_str[0] % m_prime;
+    } else if (cur_size == 2) {
+      m_right_hash = m_str[1] % m_prime;
+    } else {
+      char mid_char = m_str[(cur_size-1)/2];
+      if (cur_size % 2 != 0) {
+        // remove head char from right hash
+        m_right_hash = (m_right_hash + m_prime - (mid_char * m_half_base) % m_prime) % m_prime;
+        // add new char to right hash
+        m_right_hash = (m_right_hash * m_base + new_char) % m_prime;
+      } else {
+        m_half_base = (m_half_base * m_base) % m_prime; // increase half base
+        // add mid char to left hash
+        m_left_hash = (mid_char * m_half_base + m_left_hash) % m_prime;
+
+        // add new char to right hash
+        m_right_hash = (m_right_hash * m_base + new_char) % m_prime;
+      }
+    }
+
+    if (m_left_hash != m_right_hash) {
+      m_status.push_back('N');
+    } else {
+      m_status.push_back( (IsPalindrome(m_str, 0, m_str.size()-1) ? 'Y' : 'N') );
+    }
+
+    return m_status;
+  }
+
+  std::string GetStatus() const {
+    return m_status;
+  }
+private:
+  int m_prime;
+  int m_base;
+  int m_left_hash;
+  int m_right_hash;
+  int m_half_base;
+  std::string m_str;
+  std::string m_status;
+};
+
 
 void UnitTest() {
-  assert(CheckPalindrome("AABAA")=="YYNNY");
-  assert(CheckPalindrome("")=="");
-  assert(CheckPalindrome("x")=="Y");
-  assert(CheckPalindrome("aabaacaabaa")=="YYNNYNNNNNY");
+  PalindromeChecker checker;
+  const std::string str("AABAA");
+  for (char c : str) {
+    checker.Check(c);
+  }
+
+  assert(checker.GetStatus() == "YYNNY");
+
+
+  PalindromeChecker checker2;
+  const std::string str2("aabaacaabaa");
+  for (char c : str2) {
+    checker2.Check(c);
+      }
+
+  assert(checker2.GetStatus() == "YYNNYNNNNNY");
 }
+
 
 int main() {
   UnitTest();

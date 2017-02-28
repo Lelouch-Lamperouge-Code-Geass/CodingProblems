@@ -4,35 +4,28 @@
 
 namespace RecursiveSolution {
   
-  bool RecursiveCheck (const std::string & str,
+ bool WildcardRecursive(const std::string & str,
                        const std::string & pattern,
-                       std::size_t i,
-                       std::size_t j) {
-    if (i == str.size() && j == pattern.size()) {
-      return true;
-    } else if (j == pattern.size()) {
-      return false;
-    } else if (i == str.size()) {
-      // skip all * left
-      while(j<pattern.size() && pattern[j]=='*') {
-        ++ j;
-      }
-      return j == pattern.size();
+                       std::size_t str_index,
+                       std::size_t pattern_index) {
+  if (str_index < str.size() && pattern_index < pattern.size()) {
+    if (pattern[pattern_index] != '*') {
+      return  (str[str_index] == pattern[pattern_index] || pattern[pattern_index] == '?') 
+        &&  WildcardRecursive(str, pattern, str_index + 1, pattern_index + 1);
     } else {
-      if (pattern[j] != '*') {
-        return ( (str[i] == pattern[j] || pattern[j]=='?') )
-          && RecursiveCheck(str,pattern,i+1,j+1);
-      } else {
-        return RecursiveCheck(str,pattern,i,j+1)
-          || RecursiveCheck(str,pattern,i+1,j);
-      }
-      
+      return pattern[pattern_index] == '*'
+        && ( WildcardRecursive(str, pattern, str_index, pattern_index + 1)
+             || WildcardRecursive(str, pattern, str_index + 1, pattern_index) );
     }
+  } else {
+    while (pattern_index < pattern.size() && pattern[pattern_index] == '*') ++pattern_index;
+    return str_index == str.size() && pattern_index == pattern.size();
   }
-  
-  bool WildcardMatch(const std::string & str, const std::string & pattern) {
-    return RecursiveCheck(str,pattern,0,0);
-  }
+}
+
+bool WildcardMatch(const std::string & str, const std::string & pattern) {
+  return WildcardRecursive(str, pattern, 0, 0);
+}
 
   
 }
@@ -69,6 +62,8 @@ namespace TwoPointerSolution {
     std::size_t str_index(0),pattern_index(0);
     std::size_t str_marker(-1),pattern_marker(-1);
 
+    // Notice that there is a concealed scenario here, when pattern_index == pattern.size()
+    // we accessed pattern[pattern_index] as well. Of course, it will be a mismatch.
     while (str_index < str_size) {
       if (pattern[pattern_index]=='*') {
         // mark where * appears
