@@ -65,17 +65,22 @@ void UnitTest() {
     array_tree[i].m_valid = true;
   }
 
-  GetStatus(array_tree,& capacity, n);
+  GetStatus(array_tree,& capacity, n); // 8 TTTTTTTT
+  
   DeleteSubTree(array_tree, & capacity, n, 5);
-  GetStatus(array_tree, & capacity, n);
+  GetStatus(array_tree, & capacity, n); // 6 TTTTTFTF
+  
   DeleteSubTree(array_tree, & capacity, n, 2);
-  GetStatus(array_tree, & capacity, 2);
+  GetStatus(array_tree, & capacity, 2); // 5 TTFTTFTF
+  
   DeleteSubTree(array_tree, & capacity, n, 3);
-  GetStatus(array_tree, & capacity, n);
+  GetStatus(array_tree, & capacity, n); // 2 TTFFFFFF
+  
   DeleteSubTree(array_tree, & capacity, n, 3);
-  GetStatus(array_tree, & capacity, n);
+  GetStatus(array_tree, & capacity, n); // 2 TTFFFFFF
+  
   DeleteSubTree(array_tree, & capacity, n, 0);
-  GetStatus(array_tree, & capacity, n);
+  GetStatus(array_tree, & capacity, n); // 0 FFFFFFFF
 
 }
 
