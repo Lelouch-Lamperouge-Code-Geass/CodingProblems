@@ -14,6 +14,9 @@ rooted tree that represents the syntactic structure of a string according to som
 The term parse tree itself is used primarily in computational linguistics; in theoretical syntax 
 the term syntax tree is more common. Parse trees are distinct from the abstract syntax trees used in computer programming, 
 in that their structure and elements more concretely reflect the syntax of the input language. 
+
+// http://stackoverflow.com/questions/1809670/how-to-implement-serialization-in-c
+
 */
 #include <unordered_map>
 #include <iostream>
