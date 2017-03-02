@@ -10,6 +10,24 @@ Given two blocking queues，每个queue都存着timestamp，只能有getNext()�
 和另一个queue里存的每个item相比, 相差大于一就删除, 否则输出
 https://www.ibm.com/developerworks/cn/aix/library/au-multithreaded_structures1/
 https://bxie.gitbooks.io/powerbook/content/two_timestamp.html
+
+// Follow up, what if there are ten blocking queues(let's say ten streams)?
+Comparing to two streams, the biggest difference how to pop out items from each queue.
+For two streams, if a new item comes in from on stream, we lock these queues, and compare this item from the front item in 
+the other queue, if the difference > 1 , we pop the front item from the other queue.
+
+If there are multiple streams, we can't simply pop like this.
+For example, a new item comes in to Q1, and we compare the item with the front item in Q2, and if the difference > 1, can we
+pop the front item from Q2? 
+NO! Because there maybe a new item coming  to Q3 whose difference with the front item in Q2 is smaller than 1!
+
+Therefore, we need maintain a MinHeap for all the tail items of these queues.
+Let's see we have 10 streams, then we need 10 queues, and also a MinHeap which stores only the tail items of the 10 queues.
+If a new item comes in to Q1, here is what we are going to do:
+(1) we add it to Q1 as well as the size-10 MinHeap.
+(2) We get the Min-Item of the MinHeap, and go to check the front items of each queue, as long as the the difference between 
+front item and the Min-Item is larger than 1, we pop the item out from the queue.
+(3) Just like what we did for two-streams, we compare the new item with all the other items of other 9 Queues.
 */
 
 #include <deque>
