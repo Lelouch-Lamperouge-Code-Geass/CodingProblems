@@ -88,7 +88,7 @@ By optimizing your code (including removing spaces, commas, and other unnecessar
 ## Application Problems
 
 #### No/Poor Load Distribution
-Poor load distribution can cause slow response times by incorrectly assigning new site visitors to bogged-down servers instead of others with cycles to spare. If too many people are on the same server, they’re going to experience problems, even if the overall system is well under capacity. It is imperative to test with a product like NeoLoad as it will help you find any infrastructural weaknesses at hand.
+Poor load distribution can cause slow response times by incorrectly assigning new site visitors to bogged-down servers instead of others with cycles to spare. If too many people are on the same server, they’re going to experience problems, even if the overall system is well under capacity. 
 
 #### Lack of caching or inefficient caching. 
 In many situations, application or perimeter caching can improve Web services performance. Caching-related issues that can significantly affect Web services performance include failure to use caching for Web methods, caching too much data, caching inappropriate data, and using inappropriate expiration settings.
@@ -102,6 +102,7 @@ On the client side, consumers of Web services have the option of calling Web ser
 
 #### Serialization
 The amount of serialization that is required for your Web method requests and responses is a significant factor for overall Web services performance. Serialization overhead affects network congestion, memory consumption, and processor utilization. To help keep the serialization overhead to a minimum:
+
 * Reduce serialization.
 * Reduce round trips.
 * Consider XML compression.
