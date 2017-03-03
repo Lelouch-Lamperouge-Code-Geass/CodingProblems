@@ -93,12 +93,44 @@ Poor load distribution can cause slow response times by incorrectly assigning ne
 #### Lack of caching or inefficient caching. 
 In many situations, application or perimeter caching can improve Web services performance. Caching-related issues that can significantly affect Web services performance include failure to use caching for Web methods, caching too much data, caching inappropriate data, and using inappropriate expiration settings.
 
+Caches are not the be-all end-all solution, but once you have decided to use a cache, there are a few things you need to consider:
+*	 Caches are a fixed size
+*	 Distributed caching is a non-trivial problem
+
+Caches hold stateful objects, unlike pools, which hold stateless objects. For example, imagine a pool as the registers at a supermarket. When you’re ready to check out, you go to whichever register is free – it doesn’t matter which one you get.  Pools contain stateless objects, meaning it doesn’t matter which connection you get – all connections are equal, but caches contain stateful objects because you go to a cache looking for a specific piece of data. 
+
+Because caches are stateful, you must configure them to a finite size so as not to exhaust memory. When the cache is full, then the cache must respond based on its configuration. For example, it might remove the least recently used object from the cache to make room for the new object. This means that sometimes the requested object may no longer be in the cache, resulting in a “miss.” A miss typically results in a database call to find the requested object. The higher your miss ratio, therefore, the less you’re taking advantage of the performance benefits of the cache. It’s important to optimize your cache settings carefully, so that you maintain a good “hit ratio” without exhausting all the memory.
+
+Distributed caching. If you have multiple servers in a tier all writing to their own caches, how do they stay in sync? If you do not configure the caches to be distributed, then they won’t. Depending on which server you hit, your results may vary (which is usually a bad thing). Most modern caches support a distributed paradigm so that when a cache is updated it will propagate its changes to other members in the cache. But depending on the number of cached nodes and the consistency of data you require, this can be expensive. Consistency refers to the integrity of your data at a point in time: if one cache node has one value for an object and another node has a different value then the two cache nodes are said to be inconsistent. On the loose end of the spectrum, caches can be “eventually consistent,” meaning that your application can tolerate short periods of time when the caches on different nodes do not have the same values. 
+
 #### Inefficient state management. 
 Inefficient state management design in Web services can lead to scalability bottlenecks because the server becomes overloaded with state information that it must maintain on a per-user basis. Common pitfalls for Web services state management include using stateful Web methods, using cookie containerbased state management, and choosing an inappropriate state store. The most scalable Web services maintain no state.
 
 #### Misuse of threads. 
 It is easy to misuse threads. For example, you might create threads on a per-request basis or you might write code that misuses the thread pool. Also, unnecessarily implementing a Web method asynchronously can cause more worker threads to be used and blocked, which affects the performance of the Web server.
 On the client side, consumers of Web services have the option of calling Web services asynchronously or synchronously. Your code should call a Web service asynchronously only when you want to avoid blocking the client while a Web service call is in progress. If you are not careful, you can use a greater number of worker and I/O threads, which negatively affects performance. It is also slower to call a service asynchronously; therefore, you should avoid doing so unless your client application needs to do something else while the service is invoked.
+
+#### Concurrency
+Code deadlocks occur when two or more threads each possess the lock for a resource the other thread needs to complete its task and neither thread is willing to give up the lock that it has already obtained. In a synchronized code block, a thread must first obtain the lock for the code block before executing that code and, while it has the lock, no other thread will be permitted to enter the code block. When your application has a deadlock in it, your JVM will eventually exhaust all or most of its threads. The application will appear to be accomplishing less and less work, but the CPU utilization of the machine on which the application is running will appear underutilized. Additionally, if you request a thread dump you will see reports of deadlocked threads.
+
+If your application is running in an application server or web container, it will have a thread pool configured to control how many requests your application can concurrently process. The server receives a request by a socket listener, places it in an execution queue, and then returns to listen for the next request to arrive on the socket. The execution queue is serviced by a thread pool. When a thread is available in the thread pool, a request is removed from the execution queue and passed to a thread for processing. The thread executes the appropriate business transaction in your application code. When the thread completes processing the thread is returned to the thread pool and will be available to process another request. 
+
+The configuration of the size of that thread pool is going to be of paramount importance to the performance of your application. If the thread pool is sized too small then your requests are going to wait (much like you would while on hold for your cable provider) but if the thread pool is sized too large then too many threads are going to execute concurrently and take all of the machine’s processing resources. When there are too many threads and the machine spends too much time context switching between threads, the threads will be “starved” of CPU cycles and will take longer to complete. You have a finite number of cores in your CPU and if threads need computing power (they aren’t waiting) then there’s only so much processing power to go around. The behavior of your application will dictate the optimal size of your thread pools.
+
+When a thread pool is sized too small then you will see the thread pool utilization (number of active threads divided by the total number of threads) at or near 100%, requests backing up in the execution queue, and the CPU underutilized. The reason is that the application has used all available threads but is not using all of the processing capabilities available to it on the machine. And because it cannot process requests fast enough, requests back up. When a thread pool is sized too large then you will see a moderately used thread pool, very few if any pending requests in the execution queue, but the CPU utilization will be at or near 100%. The reason for this is that the application has more threads than the machine is equipped to process.
+
+Troubleshooting thread pool sizing problems is actually a lot easier than the other performance challenges presented in this eBook. The key is to look at two metrics: : 
+* Thread pool utilization 
+* CPU utilization 
+
+If your thread pool utilization is high (at or near 100% with pending requests) and your CPU utilization is moderate then your thread pool is probably configured too small. If your thread pool utilization is moderate, but your CPU utilization is high then your thread pool is probably configured too large.
+
+The way to avoid thread pool misconfigurations is to tune the thread pool. This sounds easy in theory, but it’s time consuming in practice. In short, you want to size your pool large enough to properly utilize your machine’s processing resources but not large enough to saturate them. But there’s a complication: if your application accesses external resources, such as a database, your application should be configured to send enough load to those external resources to use them effectively, but not saturate them. 
+
+The way to avoid thread pool misconfigurations is to tune the thread pool. This sounds easy in theory, but it’s time consuming in practice. In short, you want to size your pool large enough to properly utilize your machine’s processing resources but not large enough to saturate them. But there’s a complication: if your application accesses external resources, such as a database, your application should be configured to send enough load to those external resources to use them effectively, but not saturate them. 
+
+
+
 
 #### Serialization
 The amount of serialization that is required for your Web method requests and responses is a significant factor for overall Web services performance. Serialization overhead affects network congestion, memory consumption, and processor utilization. To help keep the serialization overhead to a minimum:
@@ -132,8 +164,25 @@ If the table itself has too much of data then the queries will take time to exec
 If connections are not pooled then the each time a new connection is requested for a request to database. Maintaining a connection pool is much better than creating and destroying the connection for executing every SQL query.
 Connections not closed/returned to pool in case of exceptions: When an exception occurs while performing database operations, it ought to be caught. Usually catching the exception is not the issue because SQLException is a checked exception but closing the connection is something that most of the times is left out. If the connection is not released, the same connection cannot be used for any other purpose till the connection is timed out.
 
+ The number of connections to your database controls how many concurrent queries can be executed against it. If there are too few connections in the pool then you’ll have a bottleneck in your application, increasing response times and angering end users.
+ 
+ Database connections are pooled for several reasons:
+•	 Database connections are relatively expensive to create, so rather than create them on the fly we opt to create them beforehand and use them whenever we need to access the database.
+•	 The database is a shared resource so it makes sense to create a pool of connections and share them across all business transactions.
+•	 The database connection pool limits the amount of load that you can send to your database.
+
+The first two points make sense because we want to pre-create expensive resources and share them across our application. The last point, however, might seem counterintuitive. We pool connections to reduce load on the database because otherwise we might saturate the database with too much load and bring it to a screeching halt. The point is that not only do you want to pool your connections, but you also need to configure the size of the pool correctly.
+
+If you do not have enough connections, then business transactions will be forced to wait for a connection to become available before they can continue processing. If you have too many connections, however, then you might be sending too much load to the database and then all business transactions across all application servers will suffer from slow database performance. The trick is finding the middle ground.
+
+The main symptoms of a database connection pool that is sized too small are increased response time across multiple business transactions, with the majority of those business transactions waiting on a Datasource.getConnection() call, in conjunction with low resource utilization on the database machine. At first glance this will look like a database problem, but the low resource utilization reveals that the database is, in fact, under-utilized, which means the bottleneck is occurring in the application.
+
+The symptoms of a database connection pool that is sized too large are increased response time across multiple business transactions, with the majority of those business transactions waiting on the response from queries, and high resource utilization in the database machine. 
+
+So while the external symptoms between these two conditions are the same, the internal symptoms are the opposite. In order to correctly identify the problem, you need to find out where your application is waiting on the database (for a connection to the database or on the execution of a query) and what the health of the database is.
 
 
+The impact of a misconfigured database connection pool rates an 8 on my scale because the performance impact will be observable by your users. The fix is simple but will require time and effort: use load testing and a performance analysis tool to find the optimal value for the size of your database connection pool, and then make the configuration change.
 
 
 
