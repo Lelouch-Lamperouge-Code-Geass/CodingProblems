@@ -2,14 +2,17 @@
 * `traceroute`, `ping`, `proxy server`
 
 ## Webpage
-* Reduce redirects, reduce HTTP request-response cycle 
-* Reducing the number of webpage components , in turn reduces the number of HTTP requests required to render the page. Combine CSS/Javascript/.. files
+* Reduce redirects, reduce HTTP request-response cycle. Redirects in general delay the user, consume computation resources, and are prone to errors.
+* Reducing the number of webpage components , in turn reduces the number of HTTP requests required to render the page. Combine CSS/Javascript/.. files. The reduction of object requests increases the page performance for the user and decreases the number of requests your system must handle per user.
 * Use a Content Delivery Network : Deploying your content across multiple, geographically dispersed servers will make your pages load faster from the user's perspective.CDNs help offload traffic spikes and are often economical ways to scale parts of a site’s traffic.This optimization could be based on such things as the fewest network hops, highest availability, or fewest requests.This layer provides the benefit of faster delivery, typically very high availability, and less traffic on your site’s servers.
 * Put Stylesheets at the Top : This is because putting stylesheets in the HEAD allows the page to render progressively.It is recommended because when you have the CSS declared before <body> starts, your styles has actually loaded already. So very quickly users see something appear on their screen (e.g. background colors). If not, users see blank screen for some time before the CSS reaches the user.
 * Put Scripts at the Bottom : By placing the JS at the bottom of your page before the closing </body> tag, you are allowing the HTML to be parsed prior to loading the javascript. This gives the effect of faster page load times.
 * Make JavaScript and CSS External : Using external files in the real world generally produces faster pages because the JavaScript and CSS files are cached by the browser. JavaScript and CSS that are inlined in HTML documents get downloaded every time the HTML document is requested. This reduces the number of HTTP requests that are needed, but increases the size of the HTML document. On the other hand, if the JavaScript and CSS are in external files cached by the browser, the size of the HTML document is reduced without increasing the number of HTTP requests.
-* Reduce DNS Lookups : DNS has a cost. It typically takes 20-120 milliseconds for DNS to lookup the IP address for a given hostname. The browser can't download anything from this hostname until the DNS lookup is completed.Reducing the number of unique hostnames reduces the number of DNS lookups.
+* Reduce DNS Lookups : DNS has a cost. It typically takes 20-120 milliseconds for DNS to lookup the IP address for a given hostname. The browser can't download anything from this hostname until the DNS lookup is completed.Reducing the number of unique hostnames reduces the number of DNS lookups.Minimize the number of DNS lookups required to download pages, but balance this with the browser's limitations for simutaneous connections.
 * Minify JavaScript and CSS : Minification is the practice of removing unnecessary characters from code to reduce its size thereby improving load times. When code is minified all comments are removed, as well as unneeded white space characters (space, newline, and tab). 
+* AJAX allows web pages to be updated asynchronously by exchanging data with a web server behind the scenes. This means that it is possible to update parts of a web page, without reloading the whole page.
+
+
 
 ## Service
 * No/Poor Load Distribution : Poor load distribution can cause slow response times by incorrectly assigning new site visitors to bogged-down servers instead of others with cycles to spare.
@@ -30,3 +33,4 @@
 * Proper caching is not in place : Many applications make use of temporary caches on the application server to store the reference data or frequently accessed data as memory is less of an issue than the time with new generation servers.
 * Number of rows in the table too large: If the table itself has too much of data then the queries will take time to execute. Partitioning a table into multiple tables is recommended in these situations.
 * Connections are not being pooled : If connections are not pooled then the each time a new connection is requested for a request to database. Maintaining a connection pool is much better than creating and destroying the connection for executing every SQL query. Connections not closed/returned to pool in case of exceptions: When an exception occurs while performing database operations, it ought to be caught. 
+* Use the right type of database lock : understand the types of locks and manage their usage to maximize database throughput and concurrency.  Change lock types to get better utilization of databases and look to split schemas or distribute databases as you grow. When choosing databases, ensure you choose one that allows multiple lock types and granularity to maximize concurrency.
