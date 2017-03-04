@@ -5,6 +5,22 @@ class PalindromeChecker {
 public:
   PalindromeChecker() : m_str(""), m_prime(919), m_base(256), m_half_base(1) , m_left_hash(0), m_right_hash(0){}
 
+  static bool IsPalindrome(const std::string & str,
+                           std::size_t left,
+                           std::size_t right) {
+    bool reval(true);
+    while(left<right) {
+      if (str[left]!=str[right]) {
+        reval = false;
+        break;
+      } else {
+        ++ left;
+        -- right;
+      }
+    }
+    return reval;
+  }
+  
   bool AddAndCheck(char new_char) {
     m_str.push_back(new_char);
     if (m_str.size() <=1 ) {
@@ -26,7 +42,7 @@ public:
     }
 
     //std::cout << m_left_hash <<" : " << m_right_hash << std::endl;
-    return m_left_hash == m_right_hash;
+    return m_left_hash == m_right_hash && IsPalindrome(m_str, 0, m_str.size() - 1);
   }
 private:
   int m_prime;
