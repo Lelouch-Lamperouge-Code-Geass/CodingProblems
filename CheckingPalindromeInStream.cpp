@@ -1,74 +1,52 @@
 // http://www.geeksforgeeks.org/online-algorithm-for-checking-palindrome-in-a-stream/
-#include <vector>
 #include <iostream>
-#include <cassert>
 
-bool IsPalindrome(const std::string & str,
-                  std::size_t left,
-                  std::size_t right) {
-  while(left<right) {
-    if (str[left]!=str[right]) {
-      return false;
+class PalindromeChecker {
+public:
+  PalindromeChecker() : m_str(""), m_prime(919), m_base(256), m_half_base(1) , m_left_hash(0), m_right_hash(0){}
+
+  bool AddAndCheck(char new_char) {
+    m_str.push_back(new_char);
+    if (m_str.size() <=1 ) {
+      return true;
     } else {
-      ++ left;
-      -- right;
-    }
-  }
-  return true;
-}
-std::string CheckPalindrome(const std::string & str) {
-  // characters in the input alphabet
-  static int base(256);
-  // q is a prime number used for evaluating Rabin Karp's Rolling hash
-  static int quotient(103);
- 
-  if (str.empty()) return "";
-  const std::size_t str_size(str.size());
+      if (m_str.size() % 2 == 0) {
+        if(m_str.size() >= 4) m_half_base *= m_base;
 
-  std::string reval("");
-  reval.push_back('Y');
-  if (str_size==1) return reval;
-
-  int left_hash(str[0]%quotient), right_hash(str[1]%quotient);
-  for (std::size_t i=1, h=1;i<str_size;++i) {
-    if (left_hash != right_hash) {
-      reval.push_back('N');
-    } else {
-      if (IsPalindrome(str,0,i)) {
-        reval.push_back('Y');
+        char left_head = m_str[(m_str.size()-1) / 2];
+        m_left_hash = ( left_head * m_half_base + m_left_hash) % m_prime;
+        m_right_hash = (m_right_hash * m_base + new_char) % m_prime;
       } else {
-        reval.push_back('N');
-      }  
+        char right_head = m_str[m_str.size() / 2];
+        // remove head from right hash
+        m_right_hash = (m_right_hash + m_prime - (right_head * m_half_base) % m_prime) % m_prime;
+        // add new char
+        m_right_hash = (m_right_hash * m_base + new_char) % m_prime;
+      }
     }
 
-    if (i%2==1) {
-      // current string length(i+1) is even ==> next i is even
-      // Need to chop the head of the right substring
-      // and append (i+1)th char the right substring
-      right_hash = (right_hash+quotient-str[(i+1)/2]*h);
-      right_hash = ( (right_hash*base) % quotient + str[i+1]) % quotient;
-    } else {
-      // current string length is odd ==> next i is odd
-      // need to append the middle char to the left substring
-      // need to append the (i+1)-th char to the right substring
-      h = (h*base) % quotient;
-      left_hash = (str[i/2]*h + left_hash) % quotient;
-      right_hash = ( (right_hash * base) % quotient + str[i+1] ) % quotient;
-    }
+    //std::cout << m_left_hash <<" : " << m_right_hash << std::endl;
+    return m_left_hash == m_right_hash;
   }
-  return reval;
-}
+private:
+  int m_prime;
+  int m_left_hash;
+  int m_right_hash;
+  int m_base;
+  int m_half_base;
+  std::string m_str;
+};
+
 
 void UnitTest() {
-  assert(CheckPalindrome("AABAA")=="YYNNY");
-  assert(CheckPalindrome("")=="");
-  assert(CheckPalindrome("x")=="Y");
-  assert(CheckPalindrome("aabaacaabaa")=="YYNNYNNNNNY");
+  PalindromeChecker checker;
+  const std::string str("aabaacaabaa");
+  for (char c : str) {
+    std::cout << ( checker.AddAndCheck(c)? "Y":"N" ) << std::endl;
+  }
 }
 
 int main() {
   UnitTest();
-  std::string reval = CheckPalindrome("AABAA");
-  std::cout << reval << std::endl;
   return 0;
 }
