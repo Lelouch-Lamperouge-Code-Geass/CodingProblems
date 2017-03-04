@@ -24,41 +24,58 @@ i = 3 时， K3 = K2 + P2 = 3, P3 = K2 = 2, n = K3 + P3 = 5;
 i = 4 时， K4 = K3 + P3 = 5, P4 = K3 = 3, n = K4 + P4 = 8;
 
 抛开 i = 0 为特殊情况， 
- i= 0 时， 经历了0次反射的光有0束
+ i= 0 时， 经历了0次反射的光有1束
  i= 1 时， 经历了1次反射的光有3束（其中一束的最终反射点在外层玻璃，没有进入玻璃的那束光不算）
  i= 2 时， 经历了2次反射的光有3束 （其中两束光是由i=1的那束最终反射点在外层玻璃的光衍生而来，另外一束则是由最终反射点在内层玻璃的那束光衍生而来）
  i= 3 时， 经历了3次反射的光有5束
  i= 4 时， 经历了4次反射的光有8束
 ***/
-#include <iostream>
 #include <cassert>
+#include <iostream>
 
+/***
+    --------------
+    |            |
+    --------------
+    |            |
+    --------------
+ ***/
 std::size_t ReflectionCount(std::size_t num_of_reflection) {
   if (num_of_reflection == 0) return 1;
   if (num_of_reflection == 1) return 3;
-  std::size_t pre2 = 1, pre1 = 3;
-  for (std::size_t i = 2; i <= num_of_reflection; ++ i) {
-    std::size_t curr = pre2 + pre1;
-    pre2 = pre1;
-    pre1 = curr;
+  // The amount of reflection==1 is 3, one is the beam hit outlayer outside of the glass,
+  // which will leave forever. One is the beam hit outlayer wihin glass, one is the beam
+  // hit inner-layer within glass.
+  std::size_t pre_outer_layer_reflect(1), pre_inner_layer_reflect(1), cur_reflection(3);
+
+  for (std::size_t i = 2; i <= num_of_reflection; ++i) {
+
+    std::size_t cur_outer_layer_reflect = pre_outer_layer_reflect + pre_inner_layer_reflect;
+    std::size_t cur_inner_layer_reflect = pre_outer_layer_reflect;
+
+    // update
+    pre_outer_layer_reflect = cur_outer_layer_reflect;
+    pre_inner_layer_reflect = cur_inner_layer_reflect;
+
+    cur_reflection = cur_outer_layer_reflect + cur_inner_layer_reflect;
   }
-  return pre1;
+
+  return cur_reflection;
 }
 
 
 void UnitTest() {
   assert(ReflectionCount(0) == 1);
   assert(ReflectionCount(1) == 3);
-  assert(ReflectionCount(2) == 4);
-  assert(ReflectionCount(3) == 7);
-  assert(ReflectionCount(4) == 11);
-  assert(ReflectionCount(5) == 18);
-  assert(ReflectionCount(6) == 29);
-  assert(ReflectionCount(7) == 47);
+  assert(ReflectionCount(2) == 3);
+  assert(ReflectionCount(3) == 5);
+  assert(ReflectionCount(4) == 8);
+  assert(ReflectionCount(5) == 13);
+  assert(ReflectionCount(6) == 21);
 }
-
 
 int main() {
   UnitTest();
   return 0;
 }
+
