@@ -27,24 +27,25 @@ Thus, at the next step of the simulation, the state would be: 00011101
 #include <sstream>
 
 void OneDimensionGameOfLife(std::vector<int> & board) {
-  const std::size_t board_size(board.size());
-  for (std::size_t i = 0; i < board_size; ++i) {
-    std::size_t left = ( i == 0 ? board_size - 1 : i - 1 );
-    std::size_t right = ( i == board_size - 1 ? 0 : i + 1);
-    int live_neighbor = (board[left] & 1) + (board[right] & 1);
-    if (live_neighbor != 1) { // not change status
-      board[i] += (board[i]<<1);
-    } else { // change status
-      if (board[i]==0) board[i] = 2 ;
-      // no need for board[i]==1, since it is 00001;
+  const std::size_t size(board.size());
+
+  for (std::size_t i = 0; i < size; ++i) {
+    std::size_t left = (i + size - 1) % size;
+    std::size_t right = (i + size + 1) % size;
+
+    int live = (board[left] & 1) + (board[right] & 1);
+
+    if (live != 1) { // no change
+      board[i] += (board[i] << 1 ) ;
+    } else { // change
+      if ( board[i] == 0) board[i] |= 2;
     }
   }
 
   for (int & val : board) {
-    val >>= 1;
+    val >>= 1 ;
   }
 }
-
 
 void UnitTest() {
   std::vector<int> board = {0,1,1,0,0,1,0,1};
