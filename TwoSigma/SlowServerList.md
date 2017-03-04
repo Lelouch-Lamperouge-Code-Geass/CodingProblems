@@ -19,3 +19,14 @@
   * Thread pool utilization
   * CPU utilization
 * Enable compression : Compression reduces response times by reducing the size of the HTTP response. Gzip is the most popular and effective compression method at this time.
+
+
+## Database
+* Indexing : Make sure appropriate indexes is built for fast access. Analyze the frequently-used queries and examine the query plan when it is executed (e.g. use "explain" for MySQL). Check whether appropriate index exist and being used.
+* Data De-normalization : Table join is an expensive operation and should be reduced as much as possible. One technique is to de-normalize the data such that certain information is repeated in different tables.
+* DB Replication : For typical web application where the read/write ratio is high, it will be useful to maintain multiple read-only replicas so that read access workload can be spread across. For example, in a 1 master/N slaves case, all update goes to master DB which send a change log to the replicas. However, there will be a time lag for replication.
+* Transaction Processing : Avoid mixing OLAP (query intensive) and OLTP (update intensive) operations within the same DB. In the OLTP system, avoid using long running database transaction and choose the isolation level appropriately. 
+* The database tables should be properly normalized
+* Proper caching is not in place : Many applications make use of temporary caches on the application server to store the reference data or frequently accessed data as memory is less of an issue than the time with new generation servers.
+* Number of rows in the table too large: If the table itself has too much of data then the queries will take time to execute. Partitioning a table into multiple tables is recommended in these situations.
+* Connections are not being pooled : If connections are not pooled then the each time a new connection is requested for a request to database. Maintaining a connection pool is much better than creating and destroying the connection for executing every SQL query. Connections not closed/returned to pool in case of exceptions: When an exception occurs while performing database operations, it ought to be caught. 
