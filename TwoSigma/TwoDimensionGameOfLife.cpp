@@ -55,7 +55,7 @@ public:
         std::size_t max_col = col_size + j + 1;
         for (std::size_t p = min_row; p <= max_row; ++p) {
           for (std::size_t q = min_col; q <= max_col; ++q) {
-            if (p == i && q == j) continue;
+            if ( (p % row_size == i) && (q % col_size == j) ) continue;
             // 使用的时候要取模
             live += board[p % row_size][q % col_size] & 1;
           }
