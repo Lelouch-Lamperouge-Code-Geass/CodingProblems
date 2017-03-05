@@ -113,6 +113,34 @@ void UnitTest() {
   assert(WildcardMatch("aa","?")==false);
 }
 
+
+void UnitTest_Match() {
+  assert( WildcardMatch("abc","a*") == true );
+  assert( WildcardMatch("","") == true );
+  assert( WildcardMatch("","*") == true );
+  assert( WildcardMatch("abcd","*") == true );
+  assert( WildcardMatch("abc","a*b*c") == true );
+  assert( WildcardMatch("abc","abc") == true );
+  assert( WildcardMatch("1*3*5","1*5") == true );
+  assert( WildcardMatch("1234","1?3?") == true );
+  assert( WildcardMatch("1*3?","1?3*") == true );
+  assert( WildcardMatch("***","*") == true );
+  assert( WildcardMatch("aaaaaaaaaaaa","a*aa") == true );
+}
+
+void UnitTest_NotMatch() {
+  assert( WildcardMatch("abc","a*d") == false );
+  assert( WildcardMatch(""," ") == false );
+  assert( WildcardMatch("*","1") == false );
+  assert( WildcardMatch("aab","c*a*b") == false );
+  assert( WildcardMatch("abc","a*c*b") == false );
+  assert( WildcardMatch("aa","?") == false );
+  assert( WildcardMatch("aaa","aa") == false );
+  assert( WildcardMatch("abcd","a*??c") == false );
+}
+
+
+
 int main() {
   UnitTest();
   return 0;
