@@ -2,8 +2,10 @@
 * `traceroute`
 * `ping`
 * `nslookup`
-* 'dig`
+* `dig`
 * proxy server
+* Network congestion: There's too much traffic. Either reduce the amount of traffic or get more bandwidth.
+
 
 ## Webpage
 * Reduce redirects, reduce HTTP request-response cycle. Redirects in general delay the user, consume computation resources, and are prone to errors.
