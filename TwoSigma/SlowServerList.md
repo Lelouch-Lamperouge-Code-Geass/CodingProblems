@@ -1,5 +1,9 @@
 ## Network Problems
-* `traceroute`, `ping`, `proxy server`
+* `traceroute`
+* `ping`
+* `nslookup`
+* 'dig`
+* proxy server
 
 ## Webpage
 * Reduce redirects, reduce HTTP request-response cycle. Redirects in general delay the user, consume computation resources, and are prone to errors.
