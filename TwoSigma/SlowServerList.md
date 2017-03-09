@@ -20,7 +20,13 @@
 
 
 
-## Service
+## Server issue
+* Step one, Check I/O wait and CPU Idletime : How: use top - look for "wa" (I/O wait) and "id" (CPU idletime) Why: checking I/O wait is the best initial step to narrow down the root cause of server slowness. If I/O wait is low, you can rule out disk access in your diagnosis.I/O Wait represents the amount of time the CPU waiting for disk or network I/O. Waiting is the key here - if your CPU is waiting, it's not doing useful work. It's like a chef who can't serve a meal until he gets a delivery of ingredients. Anything above 10% I/O wait should be considered high.On the other hand, CPU idle time is a metric you WANT to be high -- the higher this is, the more bandwidth your server has to handle whatever else you throw at it. If your idle time is consistently above 25%, consider it "high enough"
+* Step 2: IO Wait is low and idle time is low: check CPU user time : How: use top again -- look for the %us column (first column), then look for a process or processes that is doing the damage.Why: at this point you expect the usertime percentage to be high -- there's most likely a program or service you've configured on you server that's hogging CPU. Checking the % user time just confirms this. When you see that the % usertime is high, it's time to see what executable is monopolizing the CPU. If there's a single process hogging the CPU in a way that seems abnormal, it's an anomalous situation that a service restart can fix. If there are are multiple processes taking up CPU resources, or it there's one process that takes lots of resources while otherwise functioning normally, than your setup may just be underpowered. You'll need to upgrade your server (add more cores), or split services out onto other boxes. In either case, you have a resolution:if situation seems anomalous: kill the offending processes.if situation seems typical given history: upgrade server or add more servers.
+* Step 3: IO wait is low and idle time is high. Your slowness isn't due to CPU or IO problems, so it's likely an application-specific issue. It's also possible that the slowness is being caused by another server in your cluster, or by an external service you rely on.
+* Step 4: IO Wait is high: check your swap usage.How: use top or ```free -m```. 
+
+## Application issue
 * No/Poor Load Distribution : Poor load distribution can cause slow response times by incorrectly assigning new site visitors to bogged-down servers instead of others with cycles to spare.
 * Lack of caching or inefficient caching : Caching-related issues that can significantly affect Web services performance include failure to use caching for Web methods, caching too much data, caching inappropriate data, and using inappropriate expiration settings.It’s important to optimize your cache settings carefully, so that you maintain a good “hit ratio” without exhausting all the memory.
 * It is bad to  create threads on a per-request basis. By maintaining a pool of threads, the model increases performance and avoids latency in execution due to frequent creation and destruction of threads for short-lived tasks.
@@ -28,7 +34,6 @@
   * Thread pool utilization
   * CPU utilization
 * Enable compression : Compression reduces response times by reducing the size of the HTTP response. Gzip is the most popular and effective compression method at this time.
-
 
 ## Database
 * Indexing : Make sure appropriate indexes is built for fast access. Analyze the frequently-used queries and examine the query plan when it is executed (e.g. use "explain" for MySQL). Check whether appropriate index exist and being used.
