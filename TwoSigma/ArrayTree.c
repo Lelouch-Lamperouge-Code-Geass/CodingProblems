@@ -71,7 +71,7 @@ void UnitTest() {
   GetStatus(array_tree, & capacity, n); // 6 TTTTTFTF
   
   DeleteSubTree(array_tree, & capacity, n, 2);
-  GetStatus(array_tree, & capacity, 2); // 5 TTFTTFTF
+  GetStatus(array_tree, & capacity, n); // 5 TTFTTFTF
   
   DeleteSubTree(array_tree, & capacity, n, 3);
   GetStatus(array_tree, & capacity, n); // 2 TTFFFFFF
