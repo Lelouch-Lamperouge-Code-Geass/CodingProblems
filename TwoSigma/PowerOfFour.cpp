@@ -3,18 +3,20 @@
 #include <cmath>
 #include <climits>
 
-bool PowerOfFour(long num) {
-  if (num<0) return false;
-  // Check whether it only has one setting bit
-  if ( (num & (num-1)) != 0 ) return false;
 
-  // The setting bit must show up on specific position.
-  // Notice in C++, the long is usualy 32 bit.
-  if ( (num & 0xAAAAAAAA) != 0 )return false;
-  // Or you can use (num & 0x55555555) != 0 here, basically the same
-  
-  return true;
-}
+class Solution {
+public:
+    bool isPowerOfFour(int num) {
+          if (num <= 0) return false;
+      
+          // Check whether it only has one setting bit
+          if ((num & (num - 1)) != 0) return false;
+      
+            // The setting bit must show up on specific position.
+          return (num & 0x55555555) != 0;
+
+    }
+};
 
 void UnitTest_PowerOfFour() {
   assert(PowerOfFour(1) == true);
