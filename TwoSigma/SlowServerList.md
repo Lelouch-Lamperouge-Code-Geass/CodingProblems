@@ -27,6 +27,7 @@
 * Step 4: IO Wait is high: check your swap usage.How: use top or ```free -m```. 
 * Step 5: swap usage is high. High swap usage means that you are actually out of RAM.
 * Step 6: swap usage is low . Low swap means you have a "real" IO wait problem. The next step is to see what's hogging your IO. How: iotop
+
 ## Application issue
 * No/Poor Load Distribution : Poor load distribution can cause slow response times by incorrectly assigning new site visitors to bogged-down servers instead of others with cycles to spare.
 * Lack of caching or inefficient caching : Caching-related issues that can significantly affect Web services performance include failure to use caching for Web methods, caching too much data, caching inappropriate data, and using inappropriate expiration settings.It’s important to optimize your cache settings carefully, so that you maintain a good “hit ratio” without exhausting all the memory.
