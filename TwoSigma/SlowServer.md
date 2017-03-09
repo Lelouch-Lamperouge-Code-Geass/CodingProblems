@@ -4,6 +4,7 @@
 * https://my.bluehost.com/cgi/help/481
 * https://mediatemple.net/community/products/dv/204403944/why-is-my-website-slow
 * https://developer.yahoo.com/performance/rules.html
+* https://codedependents.com/2014/01/27/11-best-practices-for-low-latency-systems/
 
 ## Overview
 There are many reasons a website may be slow.
