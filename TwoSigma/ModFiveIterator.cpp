@@ -28,7 +28,7 @@ public:
 private:
   void TryPeek() {
     // if m_peeked == true, do nothing
-    while (!m_peeked && m_pos != m_end) {
+    while (!m_peeked && m_pos < m_end) {
         if ( (*m_pos) % 5 == 0) {
           m_peeked = true;
           m_peeked_val = *m_pos;
