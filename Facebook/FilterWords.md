@@ -4,7 +4,7 @@ Word should be filtered if :
 1. It is contains in blacklist
 2. If it has one edit distance to any words in blacklist. 
     One edit distance means up to 1 Add/Change/Delete.
-3. If any substring in the word satisfy 1 and 2.
+3. If any substring in the word satisfy 1 or 2.
 
 Example:  
 words = [facebook, facebok, facebo0k, faceboook, imgood, fffffacebokwithtail]    
