@@ -1,4 +1,4 @@
-/***
+
 words = [facebook, facebok, facebo0k, faceboook, imgood, fffffacebokwithtail]
 blacklist = [facebook, admin]
 output = [imgood]
@@ -7,8 +7,12 @@ output = [imgood]
 - up to 1 char change/add/removed
 - blacklist word could be a substr of word
 
-***/
+# Solution
 
+Below solution is not correct，since longest common string is not guarenteed to be a substring.
+Substring is consecutive.
+
+```cpp
 #include <vector>
 #include <iostream>
 #include <sstream>
@@ -92,3 +96,4 @@ int main() {
   UnitTest_FilterWords();
   return 0;
 }
+```
