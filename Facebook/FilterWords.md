@@ -2,7 +2,8 @@
 Given a list of words and a blacklist, filter all the words based on blacklist.
 Word should be filtered if :
 1. It is contains in blacklist
-2. If it has one edit distance to any words in blacklist. One edit distance means up to 1 Add/Change/Delete.
+2. If it has one edit distance to any words in blacklist. 
+    One edit distance means up to 1 Add/Change/Delete.
 3. If any substring in the word satisfy 1 and 2.
 
 Example:  
