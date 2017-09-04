@@ -1,11 +1,14 @@
 ```
-words = [facebook, facebok, facebo0k, faceboook, imgood, fffffacebokwithtail]  
-blacklist = [facebook, admin]  
-output = [imgood]  
+Given a list of words and a blacklist, filter all the words based on blacklist.
+Word should be filtered if :
+1. It is contains in blacklist
+2. If it has one edit distance to any words in blacklist. One edit distance means up to 1 Add/Change/Delete.
+3. If any substring in the word satisfy 1 and 2.
 
-- exact
-- up to 1 char change/add/removed
-- blacklist word could be a substr of word
+Example:  
+words = [facebook, facebok, facebo0k, faceboook, imgood, fffffacebokwithtail]    
+blacklist = [facebook, admin]    
+output = [imgood]    
 ```
 
 # Solution
