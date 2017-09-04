@@ -1,11 +1,12 @@
-
-words = [facebook, facebok, facebo0k, faceboook, imgood, fffffacebokwithtail]
-blacklist = [facebook, admin]
-output = [imgood]
+```
+words = [facebook, facebok, facebo0k, faceboook, imgood, fffffacebokwithtail]  
+blacklist = [facebook, admin]  
+output = [imgood]  
 
 - exact
 - up to 1 char change/add/removed
 - blacklist word could be a substr of word
+```
 
 # Solution
 
