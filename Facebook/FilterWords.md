@@ -12,6 +12,8 @@ output = [imgood]
 Below solution is not correct，since longest common string is not guarenteed to be a substring.
 Substring is consecutive.
 
+The correct solution should come from here. https://github.com/YangLiuNYU/LeetCode/blob/master/cplusplus/161_One_Edit_Distance.md
+
 ```cpp
 #include <vector>
 #include <iostream>
