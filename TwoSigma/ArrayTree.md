@@ -16,6 +16,8 @@ struct node { int parent; int val; bool valid; bool visited; };
 
 思路一整体上是正确的，但是往node里面加visited作为成员变量是我并不欣赏的做法，它使得这个成员变量的意义仅仅是为了满足算法的需要。程序员在设计Class的时候要追求极简主义(Minimalism). 其实这里只需要一个 ```vector<bool> visited```就可以了。
 
+因为每个节点都访问一次，所以 time complexity is O(N).
+
 # Code
 
 ### C programming language
