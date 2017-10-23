@@ -1,8 +1,9 @@
-// Very good reference: http://www.math-cs.gordon.edu/courses/cs211/ATMExample/
-/***
+Very good reference: http://www.math-cs.gordon.edu/courses/cs211/ATMExample/
+
 ATM oo design - 设计interface - 
 有基本的interface, 写implementation 
 
+```
 Accounts: 
 - checking 
 - saving 
@@ -16,9 +17,41 @@ Functions:
 class ATM 
 class User 
 class Accounts
+```
+
+# Introduction
+  
+The automatic teller machine (ATM) is an automatic banking machine (ABM) which allows customer to complete basic transactions without any help of bank representatives. There are two types of automatic teller machines (ATMs). The basic one allows the customer to only draw cash and receive a report of the account balance. Another one is a more complex machine which accepts the deposit, provides credit card payment facilities and reports account information.  
+  
+It is an electronic device which is used by only bank customers to process account transactions. The users access their account through special type of plastic card that is encoded with user information on a magnetic strip. The strip contains an identification code that is transmitted to the bank’s central computer by modem. The users insert the card into ATMs to access the account and process their account transactions.
+  
+# Automatic Telling Machine Block Diagram
+  
+![alt](https://www.elprocus.com/wp-content/uploads/2013/10/Automatic-Teller-Machine.png)
+       
+ The Automatic telling machine consists of mainly two input devices and four output devices that are;
+
+Input Devices:
+
+1. Card reader
+2. Keypad
+
+Output Devices:
+
+1. Speaker
+2. Display Screen
+3. Receipt Printer
+4. Cash Depositor      
 
 
- ***/
+# ATM Networking
+
+The internet service provider (ISP) also plays an important role in the ATMs. This provides communication between ATM and host processors. When the transaction is made, the details are input by the card holder. This information is passed on to the host processor by the ATM machine. The host processor checks these details with authorized bank. If the details are matched, the host processor sends the approval code to the ATM machine so that the cash can be transferred.
+
+       
+       
+```cpp
+
 class ATMCard {
 private:
   std::string m_card_number;
@@ -130,4 +163,4 @@ public:
   void Deposit(AccountPtr account, double amount);
   void Withdraw(AccountPtr account, double amount);
 };
-
+```
