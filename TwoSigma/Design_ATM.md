@@ -113,116 +113,84 @@ What problems can the State design pattern solve?
 # Sample Code
 
 ```cpp
+//http://www.newthinktank.com/2012/10/state-design-pattern-tutorial/
 
-class ATMCard {
+
+// Implement the default behavior.
+class ATMState{
+public:
+  virtual InsertCard(ATM* atm) {/*implementation*/}
+  virtual float GetBalanceInfo(ATM* atm){/*implementation*/}
+  virtual bool Deposit(ATM* atm,float val){/*implementation*/}
+  virtual bool Withdraw(ATM* atm,float val){/*implementation*/}
+  virtual bool VerifyPIN(ATM* atm,int pinVal){/*implementation*/}
 private:
-  std::string m_card_number;
+  friend class ATM;
 };
 
-// ATM state interface
-class ATMState {
+// Maintain no local state,
+// so it can be shared and only one instance is required.
+class NoCardState : public ATMState {
 public:
-  void InsertCard() = 0;
-  void VerifyPin() = 0;
-  void Deposit() = 0;
-  void Withdraw() = 0;
-  void Inquery() = 0;
-};
-
-// Concrete state classes, they should be singleton.
-// They won't have any member variables in general, so they are thread-safe
-class NoCardState : public ATMState { }; // this is the first state
-class HasCardState : public ATMState { }; // has card, not verify PIN yet
-class VerifiedPinState : public ATMState { }; // verified PIN
-
-// maintain reference to ATMState
-class ATM {
-public:
-  ATM(){}
-  void InsertCard() {}
-  void VerifyPin() {}
-  void Deposit() {}
-  void Withdraw() {}
-  void Inquery() {}
+  static NoCardState& Instance(){
+    static NoCardState instance;
+    return instance;
+  }
+  virtual InsertCard(ATM* atm) {atm->ChangeState(HasCardState::Instance);}
+  virtual bool Withdraw(ATM* atm,float val){std::cout<<"Please insert card"<<std::endl;}
+  virtual bool VerifyPIN(ATM* atm,int pinVal){std::cout<<"Please insert card"<<std::endl;}
+  //.........
 private:
-  // States management
-  void ChangeState(ATMStatePtr & state){m_state_ptr = state;}
-  ATMStatePtr m_state_ptr; // maintain 
-  
-  // Component parts of the ATM
-  CardReaderPtr m_card_reader_ptr; // card reader
-  CashDispenserPtr m_cash_dispenser_ptr; // cash dispenser
-  CustomerConsolePtr m_customer_console_ptr; // customer console
-  LogPtr m_log_ptr; // Logger
-  OperatorPanelPtr m_operator_panel_ptr; // Operator Panel
-  ReceiptPrinterPtr m_receipt_printer_ptr; // Receipt Printer
+  NoCardState(){}
+  NoCardState(const NoCardState& other) = delete;
+  NoCardState& operator=(const NoCardState& other) = delete;
 };
 
-class User { };
-
-// Account base class.
-// General implementation should be defined here.
-// While leave derived classes for account-type specific implementation.
-class Account {
+class HasCardState : public ATMState {
 public:
-  virtual void Deposit() {}
-  virtual void Withdraw() {}
-  virtual void Inquiry() {}
-  virtual void Transfer() {}
-};
-
-class CheckingAccount : public Account {};
-class SavingAccount : public Account {};
-
-/***
-Transaction hierarchy.
-Command pattern, memonto pattern may be suitable here depends on requirements.
-***/
-class Transaction {
-public:
-  virtual Execute() = 0;
-  virtual void Undo() = 0; 
-  virtual void Redo() = 0; 
-  virtual ~Transation() {};
-};
-
-class Withdrawal : public Transaction {
-public:
-  Withdrawal(AccountPtr account_ptr, double amount) 
-    : m_account_ptr(account_ptr), m_amount(amount), m_executed(false) {
-    
+  static HasCardState& Instance(){
+    static HasCardState instance;
+    return instance;
   }
-  virtual void Execute() { 
-    if (!m_executed) { 
-      m_account_ptr->Withdraw(m_amount); 
-      m_executed = true;
-    }
-  }
-  virtual void Undo() { 
-    if (m_executed){
-      m_account_ptr->Withdraw(amount);
-      m_account_ptr->Deposit(amount);
-      m_executed = false;
-    }
-  }
+  virtual bool Withdraw(ATM* atm,float val){std::cout<<"You hasn't input PIN yet"<<std::endl;}
+  bool VerifyPIN(ATM* atm,int pinVal) {atm->ChangeState(HasPINState::Instance);}
 private:
-  bool m_executed;
-  AccountPtr m_account_ptr;
-  double m_amount;
+  HasCardState(){}
+  HasCardState(const HasCardState& other) = delete;
+  HasCardState& operator=(const HasCardState& other) = delete;
 };
 
-// same for other transactions
-class Deposit : public Transaction {};
-class Inquiry : public Transaction {};
-class Transfer : public Transaction {};
-
-// Offer limited interaction with relational database
-class BankDatabaseProxy {
+class HasPINState : public ATMState {
 public:
-  UserPtr AuthenticateUser(const std::string & card_number, const std::string & pin);
-  void Transfer(AccountPtr account, double amount);
-  void Inquiry(AccountPtr account);
-  void Deposit(AccountPtr account, double amount);
-  void Withdraw(AccountPtr account, double amount);
+  static HasPINState& Instance(){
+    static HasPINState instance;
+    return instance;
+  }
+  virtual bool Withdraw(ATM* atm,float val){std::cout<<"You have withdrawn "<<val<<std::endl;}
+private:
+  HasPINState(){}
+  HasPINState(const HasPINState& other) = delete;
+  HasPINState& operator=(const HasPINState& other) = delete;
 };
+
+class ATM{
+private:
+  ATMState *m_state; // keeps an instance of state class ATMState
+  void ChangeState(ATMState *new_state) {m_state = new_state;}
+public:
+  ATM(){m_state = & NoCardState::Instance();} // initial state is no card
+  void InsertCard() {m_state->InsertCard(this);}
+  float GetBalance(){return m_state->GetBalance(this);}
+  bool Deposit(float val){return m_state->Deposit(this,val);}
+  bool Withdraw(float val){return m_state->Withdraw(this,val);}
+  bool VerifyPIN(int pinVal){return m_state->VerifyPIN(this,pinVal);}
+};
+
+int main(){
+  ATM atm;
+  atm.Withdraw();
+  atm.InsertCard();
+  atm.VerifyPin(1234);
+  atm.Withdraw(100.50);
+}
 ```
