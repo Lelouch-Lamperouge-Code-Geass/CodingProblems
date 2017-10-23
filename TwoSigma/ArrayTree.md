@@ -1,3 +1,18 @@
+Remove subtree from tree 给的程序是用C写的，很长，大部分不用看，只需要写一个子函数，要现场编译现场跑给定一个数组，数组的每个元素就是一个节点(struct node)，大概的长得像下面这样 
+
+```
+struct node{ int parent; int val; bool valid; }; 
+```
+parent代表当前node的parent 在数组里的index，root node的parent是-1. 所以node 是child指向parent的。给定一个数组和数组的某个index，删除这个index以及它的子树(只需要将node里的valid置为false即可)，只能用O(n)的空间复杂度 解法：在strcut node里面添加一个新的元素visited（一定要记得在程序里初始化node的地方，把visited设为false），代表该node是否被访问过。然后从头到尾访问输入数组。对于当前访问的元素，如果已经被visited了，则忽略。否则，沿着parent指针走，直到到达根节点（则从当前node到根节点的所有node都不需要delete），或者到达一个被标记为删除的节点（则当前node到根节点所有的node都需要被删除） 
+
+```
+struct node { int parent; int val; bool valid; bool visited; }; 
+```
+
+
+# Code
+
+```c
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -90,3 +105,4 @@ int main() {
   UnitTest();
   return 0;
 }
+```
