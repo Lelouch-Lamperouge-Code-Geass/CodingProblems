@@ -1,17 +1,47 @@
-/*
-http://www.geeksforgeeks.org/fibonacci-coding/
+#### Zeckendorf’s Theorem
+  
+Zeckendorf’s theorem states that every positive Every positive integer can be written uniquely as a sum of distinct non-neighbouring Fibonacci numbers. Two Fibonacci numbers are neighbours if they one come after other in Fibonacci Sequence (0, 1, 1, 2, 3, 5, ..). For example, 3 and 5 are neighbours, but 2 and 5 are not.
+
+Given a number, find a representation of number as sum of non-consecutive Fibonacci numbers.
+
+Examples:
+
+```
+Input:  n = 10
+Output: 8 2
+8 and 2 are two non-consecutive Fibonacci Numbers
+and sum of them is 10.
+
+Input:  n = 30
+Output: 21 8 1
+21, 8 and 1 are non-consecutive Fibonacci Numbers
+and sum of them is 30.
+```
+
+The idea is to use Greedy Algorithm.
+
+```
+1) Let n be input number
+
+2) While n >= 0
+     a) Find the greatest Fibonacci Number smaller than n.
+        Let this number be 'f'.  Print 'f'
+     b) n = n - f 
+```     
+
+### Fibonacci Coding
+
+http://www.geeksforgeeks.org/fibonacci-coding/  
+
 In mathematics and computing, Fibonacci coding is a universal code which encodes positive integers into binary code words. 
 It is one example of representations of integers based on Fibonacci numbers. 
 Each code word ends with "11" and contains no other instances of "11" before the end.
-The Fibonacci code is closely related to the Zeckendorf
-representation, a positional numeral system that uses Zeckendorf's
-theorem and has the property that no number has a representation with
-consecutive 1s. 
-The Fibonacci code word for a particular integer is exactly the
-integer's Zeckendorf representation 
-with the order of its digits reversed and an additional "1" appended to the end.
-*/
+The Fibonacci code is closely related to the Zeckendorf representation, a positional numeral system that uses Zeckendorf's theorem and has the property that no number has a representation with consecutive 1s. 
+The Fibonacci code word for a particular integer is exactly the integer's Zeckendorf representation with the order of its digits reversed and an additional "1" appended to the end.
+  
+  
 
+```cpp
 #include <string>
 #include <vector>
 #include <cassert>
@@ -59,3 +89,4 @@ int main(int argc, char* argv[]) {
   UnitTestFibonacciEncoding();
   return 0;
 }
+```
