@@ -37,9 +37,38 @@ In mathematics and computing, Fibonacci coding is a universal code which encodes
 It is one example of representations of integers based on Fibonacci numbers. 
 Each code word ends with "11" and contains no other instances of "11" before the end.
 The Fibonacci code is closely related to the Zeckendorf representation, a positional numeral system that uses Zeckendorf's theorem and has the property that no number has a representation with consecutive 1s. 
-The Fibonacci code word for a particular integer is exactly the integer's Zeckendorf representation with the order of its digits reversed and an additional "1" appended to the end.
+The Fibonacci code word for a particular integer is exactly the integer's Zeckendorf representation with the order of its digits reversed and _an additional "1" appended to the end_.
   
-  
+
+Given a number n, print its Fibonacci code.
+
+Examples:
+
+```
+Input: n = 1
+Output: 11
+1 is first Fibonacci number in this representation
+and an extra 1 is appended at the end.
+
+Input:  n = 11
+Output: 001011
+11 is sum of 8 and 3.  The last 1 represents extra 1
+that is always added. A 1 before it represents 8. The
+third 1 (from beginning) represents 3.
+```
+
+The following algorithm takes an integer as input and generates a string that stores Fibonacci Encoding.
+
+1. Find the largest Fibonacci number f less than or equal to n. Say it is the i’th number in the Fibonacci series. The length of codeword for n will be i+3 characters (One for extra 1 appended at the end, One because i is an index, and one for ‘\0’). Assuming that the Fibonacci series is stored:
+
+2. Let f be the largest Fibonacci less than or equal to n, prepend ‘1’ in the binary string. This indicates usage of f in representation for n. Subtract f from n: n = n – f, Else if f is greater than n, prepend ‘0’ to the binary string.
+
+3. Move to the Fibonacci number just smaller than f .
+
+4. Repeat until zero remainder (n = 0)
+
+5. Append an additional ‘1’ to the binary string. We obtain an encoding such that two consecutive 1s indicate the end of a number (and the start of the next).
+
 
 ```cpp
 #include <string>
