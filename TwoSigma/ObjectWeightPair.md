@@ -1,9 +1,10 @@
+
 Design a data structure to hold objects with a corresponding integer weight. 
 
-(1) GetRandom : It should support: Obtain an object randomly with probability equal to (weight of the element) / (sum of the weights). 
-(2) Update : Set an object-weight pair. 
-(3) Insert : If the object is already in the structure, its weight will be updated. Otherwise, the object will be inserted and set to its weight. 
-(4) Remove : If the weight is zero, the object can be removed. 
+(1) GetRandom : It should support: Obtain an object randomly with probability equal to (weight of the element) / (sum of the weights).   
+(2) Update : Set an object-weight pair.   
+(3) Insert : If the object is already in the structure, its weight will be updated. Otherwise, the object will be inserted and set to its weight.   
+(4) Remove : If the weight is zero, the object can be removed.   
 
 put("A",3) 3/33 
 put("B",30) 30/33 
