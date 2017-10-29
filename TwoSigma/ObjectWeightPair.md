@@ -46,8 +46,13 @@ namespace SegmentTreeSolution {
 
 
   // Initilize a balanced segment tree
-  SegmentTreeNodePtr BuildSegmentTree(const std::vector<WeightObjectPtr> & objects, std::size_t start, std::size_t end){
-    if (start==end) {SegmentTreeNodePtr node =  std::make_shared<SegmentTreeNode>(objects[start]->m_label,objects[start]->m_weight);std::cout<<node->m_label<<"|"<<node->m_weight<<std::endl;; return node;}
+  SegmentTreeNodePtr BuildSegmentTree(const std::vector<WeightObjectPtr> & objects, 
+                                      std::size_t start, 
+                                      std::size_t end){
+    if (start==end) {
+      SegmentTreeNodePtr node =  std::make_shared<SegmentTreeNode>(objects[start]->m_label,objects[start]->m_weight);
+      std::cout<<node->m_label<<"|"<<node->m_weight<<std::endl;; return node;
+    }
     std::size_t mid = start + (end - start) / 2;
     SegmentTreeNodePtr mid_node = std::make_shared<SegmentTreeNode>("",0);
     mid_node->m_left = BuildSegmentTree(objects,start,mid);
