@@ -1,5 +1,19 @@
-//Find all distinct palindromic sub-strings of a given string.
+Find all distinct palindromic sub-strings of a given string.
+  
+http://www.1point3acres.com/bbs/thread-135529-1-1.html
 
+```
+longest chain
+类似word ladder，对于一个单词删掉任何一个字母，如果新单词出现在给的词典里 
+那么就形成一个 chain： old word -> new word -> newer word, 求最长长度(return int) 
+比如给vector<string> w = {a,ba,bca,bda,bdca} 最长是4： bdca->bda->ba->a;
+l先根据string的长度sort，把所有word存到hashset，再从短到长看每个word去掉每一位字母能不能在hashset中找到，
+如果能，就在去掉后生成的word的count基础上＋1，存入hashmap，记录最大的.
+```  
+
+# Solution
+
+```cpp
 #include <string>
 #include <vector>
 #include <unordered_set>
@@ -9,17 +23,6 @@
 #include <sstream>
 
 using namespace std;
-/**
-http://www.1point3acres.com/bbs/thread-135529-1-1.html
-longest chain
-类似word ladder，对于一个单词删掉任何一个字母，如果新单词出现在给的词典里 
-那么就形成一个 chain： old word -> new word -> newer word, 求最长长度(return int) 
-比如给vector<string> w = {a,ba,bca,bda,bdca} 最长是4： bdca->bda->ba->a;
-l先根据string的长度sort，把所有word存到hashset，再从短到长看每个word去掉每一位字母能不能在hashset中找到，
-如果能，就在去掉后生成的word的count基础上＋1，存入hashmap，记录最大的
-**/
-// Calculate the longest chain length for a specific word and return it.
-
 class SortStringByLength {
 public:
   bool operator() (const std::string & left, const std::string & right) {
@@ -35,8 +38,8 @@ int LongestChainLen(const std::string & word,
   int max_len(1);// For each word, its chain len is at least 1
   for (int i=0;i<word_size;++i) {
     const std::string & mut_word = word.substr(0,i)+word.substr(i+1);// try cut off every char
-    if ( word_set.find(mut_word)!=word_set.end() ) {
-      max_len = std::max(max_len,1+LongestChainLen(mut_word,chain_len,word_set));
+    if ( word_set.find(mut_word) != word_set.end() ) {
+      max_len = std::max(max_len,1 + LongestChainLen(mut_word,chain_len,word_set));
     }
   }
   chain_len[word] = max_len;
@@ -67,3 +70,4 @@ int main(int argc, char* argv[])
   assert(val2==5);
   return 0;
 }
+```
