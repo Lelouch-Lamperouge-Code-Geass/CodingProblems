@@ -10,6 +10,7 @@ This trading book could have two functions, which are
 1. Add(symbol_id,company,prices,quyantity,sell/buy)
 2. Delete(symbol_id)
 
+# Solution
 
 ```cpp
 #include <iostream>
