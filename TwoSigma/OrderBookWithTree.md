@@ -1,13 +1,17 @@
-/*
-  A trading book is the portolio of financial instruments held by a brokerage or
-  bank.
-  Design its data structure to support below functionalities:
-  (1) Being able to return min sell and max buy price for a security.
-  (2) Beging able to tell how much did it cost to buy a security.
-  This trading book could have two functions, which are
-  (1) Add(symbol_id,company,prices,quyantity,sell/buy)
-  (2) Delete(symbol_id)
-*/
+A trading book is the portolio of financial instruments held by a brokerage or bank.
+
+Design its data structure to support below functionalities:
+
+1. Being able to return min sell and max buy price for a security.
+2. Beging able to tell how much did it cost to buy a security.
+  
+This trading book could have two functions, which are
+  
+1. Add(symbol_id,company,prices,quyantity,sell/buy)
+2. Delete(symbol_id)
+
+
+```cpp
 #include <iostream>
 #include <memory>
 #include <unordered_map>
@@ -186,4 +190,4 @@ int main() {
   UnitTest_OrderBook();
   return 0;
 }
-
+```
