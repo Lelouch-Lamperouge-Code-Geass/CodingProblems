@@ -12,6 +12,14 @@ This trading book could have two functions, which are
 
 # Solution
 
+In this tradebook, for each ticker, we can use one MaxHeap for buy orders, one MinHeap for sell orders.
+
+To delete order, we can use HashMap locate its position in heap.
+
+Unfortunatelly, you can't use std::priority_queue in C++ because it only provide access to top element.
+
+Guess you have to write your own Heap (or similar tree structure).
+
 ```cpp
 #include <iostream>
 #include <memory>
