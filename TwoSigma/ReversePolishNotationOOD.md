@@ -1,14 +1,56 @@
+# Interpreter Pattern
 
-Interpreter Design Pattern: Interpreter pattern provides a way to evaluate language grammar or expression. 
-
-This pattern involves implementing an expression interface which tells to interpret a particular context. 
-In computer programming, the interpreter pattern is a design pattern that specifies how to evaluate sentences in a language. The basic idea is to have a class for each symbol (terminal or nonterminal) in a specialized computer language. The syntax tree of a sentence in the language is an instance of the composite pattern and is used to evaluate (interpret) the sentence for a client. In computer science, an abstract syntax tree (AST), or just syntax tree, is a tree representation of the abstract syntactic structure of source code written in a programming language. Each node of the tree denotes a construct occurring in the source code. 
+In computer programming, the __interpreter pattern__ is a design pattern that specifies how to evaluate sentences in a language. The basic idea is to have a class for each symbol (__terminal__ or __nonterminal__) in a specialized computer language. The __syntax tree__ of a sentence in the language is an instance of the __composite pattern__ and is used to evaluate (interpret) the sentence for a client. In computer science, an abstract syntax tree (AST), or just syntax tree, is a tree representation of the abstract syntactic structure of source code written in a programming language. Each node of the tree denotes a construct occurring in the source code. 
 
 The syntax is "abstract" in not representing every detail appearing in the real syntax. A parse tree or parsing tree or derivation tree or (concrete) syntax tree is an ordered, rooted tree that represents the syntactic structure of a string according to some context-free grammar. The term parse tree itself is used primarily in computational linguistics; in theoretical syntax the term syntax tree is more common. Parse trees are distinct from the abstract syntax trees used in computer programming, in that their structure and elements more concretely reflect the syntax of the input language. 
 
-// http://stackoverflow.com/questions/1809670/how-to-implement-serialization-in-c
+http://stackoverflow.com/questions/1809670/how-to-implement-serialization-in-c
 
 
+#### Overview
+
+What problems can the Interpreter design pattern solve?
+
+* A grammar for a simple language should be defined
+* so that sentences in the language can be interpreted.
+
+When a problem occurs very often, it could be considered to represent it as a sentence in a simple language (Domain Specific Languages) so that an interpreter can solve the problem by interpreting the sentence.
+
+For example, when many different or complex search expressions must be specified. Implementing (hard-wiring) them directly into a class is inflexible because it commits the class to particular expressions and makes it impossible to specify new expressions or change existing ones independently from (without having to change) the class.
+
+What solution does the Interpreter design pattern describe?
+
+* Define a grammar for a simple language by defining an Expression class hierarchy and implementing an interpret() operation.  
+* Represent a sentence in the language by an abstract syntax tree (AST) made up of Expression instances.  
+* Interpret a sentence by calling interpret() on the AST.  
+
+The expression objects are composed recursively into a composite/tree structure that is called abstract syntax tree.
+
+The Interpreter pattern doesn't describe how to build an abstract syntax tree. This can be done either manually by a client or automatically by a parser.
+
+![alt](https://upload.wikimedia.org/wikipedia/commons/3/33/W3sDesign_Interpreter_Design_Pattern_UML.jpg)
+
+
+# Factory method pattern
+
+In class-based programming, the __factory method pattern__ is a creational pattern that uses factory methods to deal with the problem of creating objects without having to specify the exact class of the object that will be created. This is done by creating objects by calling a factory method—either specified in an interface and implemented by child classes, or implemented in a base class and optionally overridden by derived classes—rather than by calling a constructor.
+
+### Overview
+
+* How can an object be created so that subclasses can redefine which class to instantiate?  
+* How can a class defer instantiation to subclasses?  
+
+Creating an object directly within the class that requires (uses) the object is inflexible because it commits the class to a particular object and makes it impossible to change the instantiation independently from (without having to change) the class.
+
+The Factory Method design pattern describes how to solve such problems:  
+
+* Define a separate operation (factory method) for creating an object.  
+* Create an object by calling a factory method.  
+
+
+# Solution
+
+In this solution, we use interpreter pattern to define token's hierarchy. And we use factory method to make client be able to define their open operator and operand.
 
 ```cpp
 #include <unordered_map>
@@ -17,6 +59,8 @@ The syntax is "abstract" in not representing every detail appearing in the real 
 #include <memory>
 #include <cassert>
 
+// When define tokens, we use interpreter pattern.
+// The Execute(std::vector<OperandPtr> & operands) is like our interpret function.
 class Token {
 public:
   virtual ~Token(){}
