@@ -9,6 +9,7 @@ Some about C programming language:
 
 * C has no reference, if you want to use reference, use pointer
 * Important to set the value of array one by one, otherwise the dumb compiler may give random true/false values.
+* A C variable declaration just tells the compiler to set aside and name an area of memory for you. For automatic variables, also known as stack variables, the values in that memory are not changed from what they were before.
 
 ```c
 #include <stdio.h>
