@@ -8,6 +8,7 @@ Here, valid=false means the node has been deleted.
 Some about C programming language:
 
 * C has no reference, if you want to use reference, use pointer
+* Important to set the value of array one by one, otherwise the dumb compiler may give random true/false values.
 
 ```c
 #include <stdio.h>
@@ -61,7 +62,11 @@ void DeleteSubTree(struct Node array_tree[],
   // Important check, we can't delete onde node twice.
   if (!array_tree[sub_index].m_is_valid) return;
 
-  bool visited[tree_capacity]; // All false by default
+  // Important to set the value to be false one by one.
+  // Otherwise the dumb compiler may give random true/false values
+  bool visited[tree_capacity]; 
+  for (int i = 0; i < tree_capacity; ++i) visited[i] = false;
+
 
   // Mark this node to be deleted.
   array_tree[sub_index].m_is_valid = false;
@@ -119,8 +124,7 @@ The output should be :
 Tree capacity : 8. Tree size : 8.  TTTTTTTT
 Tree capacity : 8. Tree size : 6.  TTTTTFTF
 Tree capacity : 8. Tree size : 5.  TTFTTFTF
-Tree capacity : 8. Tree size : 3.  TTFFTFFF
-Tree capacity : 8. Tree size : 3.  TTFFTFFF
-Tree capacity : 8. Tree size : 2.  FTFFTFFF
-
+Tree capacity : 8. Tree size : 2.  TTFFFFFF
+Tree capacity : 8. Tree size : 2.  TTFFFFFF
+Tree capacity : 8. Tree size : 0.  FFFFFFFF
 ```
