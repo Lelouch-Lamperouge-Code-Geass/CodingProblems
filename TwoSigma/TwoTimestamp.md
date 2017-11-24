@@ -30,6 +30,10 @@ If a new item comes in to Q1, here is what we are going to do:
 (2) We get the Min-Item of the MinHeap, and go to check the front items of each queue, as long as the the difference between front item and the Min-Item is larger than 1, we pop the item out from the queue.  
 (3) Just like what we did for two-streams, we compare the new item with all the other items of other 9 Queues.  
 
+The key points are :
+
+1. any item in any queue will be discarded only when it is useless
+2. any item in one queue has been compared to all the items come before it, while the reason it is still in this queue is because it is waiting for future items in the other queue 
 
 
 ```cpp
