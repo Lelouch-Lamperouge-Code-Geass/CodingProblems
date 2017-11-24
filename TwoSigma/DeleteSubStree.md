@@ -4,6 +4,12 @@ Given an array of TreeNode, how can you delete a sub-stree by a given index?
 
 Here, valid=false means the node has been deleted.
 
+__Pitfall:__
+
+1. You need avoid duplicate deletion of node.
+2. You need make sure visited get updated
+3. You need make sure index is valid
+
 
 Some about C programming language:
 
