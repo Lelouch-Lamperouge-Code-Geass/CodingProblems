@@ -77,6 +77,7 @@ public:
   }
 };
 
+// Here we used factory method.
 class OperatorCreator {
 public:
   virtual ~OperatorCreator(){}
@@ -116,6 +117,8 @@ public:
   }
 };
 
+// Even this class's name has "Factory", it has nothing to do
+// with factory method.
 class OperatorFactory {
 public:
   bool IsOperator(const std::string & str) const {
