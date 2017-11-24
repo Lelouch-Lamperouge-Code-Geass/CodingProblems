@@ -34,73 +34,106 @@ If a new item comes in to Q1, here is what we are going to do:
 
 ```cpp
 #include <deque>
-#include <mutex>
-#include <vector>
-#include <random>
-#include <thread>
 #include <iostream>
+#include <algorithm>
+#include <mutex>
+#include <thread>
+#include <chrono>
 
-class TimestampStream {
-public:
-  TimestampStream(const std::vector<double> & input) : m_pos(0){
-    m_values = input;
+double fRand(double fMin, double fMax)
+{
+  double f = (double)rand() / RAND_MAX;
+  return fMin + f * (fMax - fMin);
+}
+
+struct Item {
+  Item(std::string label, int val, double timestamp) : m_label(label), m_val(val), m_timestamp(timestamp){}
+  std::string m_label;
+  int m_val;
+  double m_timestamp;
+  std::string toString() {
+    return m_label + "," + std::to_string(m_val) + "," + std::to_string(m_timestamp);
   }
-  bool HasNext() { return m_pos<m_values.size();}
-  double GetNext() { return m_values[m_pos++]; }
-private:
-  int m_pos;
-  std::vector<double> m_values;
 };
 
-std::mutex m_mutex;
-std::deque<double> q1, q2;
-std::vector<std::pair<double, double> > m_res;
+class BlockingStream {
+public:
+  BlockingStream(int capacity, std::string label) {
+    for (int i = 0; i < capacity; ++i) {
+      m_items.emplace_back(Item(label, rand() % 100, fRand(1, 100)));
+    }
 
-void Calculate(std::deque<double>& q1, std::deque<double>& q2, double val,bool reverse_pair) {
-  q1.push_back(val);
-  while (!q2.empty() && val - q2.front() >= 1) {
-    q2.pop_front();
+    std::sort(m_items.begin(), m_items.end(),
+              [](const Item &left, const Item &right){
+                return left.m_timestamp < right.m_timestamp;
+              });
   }
-  for (double num : q2) {
-    if (std::abs(val - num) < 1) {
-      if (!reverse_pair) m_res.push_back(std::make_pair(val, num));
-      else m_res.push_back(std::make_pair(num, val));
+
+  bool hasItem() {
+    std::unique_lock<std::mutex> lock(m_mutex_of_queue);
+    return !m_items.empty();
+  }
+Item Pop() {
+    std::this_thread::sleep_for (std::chrono::milliseconds(100));
+    std::unique_lock<std::mutex> lock(m_mutex_of_queue);
+    Item reval = m_items.front();
+    m_items.pop_front();
+    return reval;
+  }
+private:
+  std::mutex m_mutex_of_queue;
+  std::deque<Item> m_items;
+};
+
+
+std::deque<Item> queue_one, queue_two;
+std::vector< std::pair<Item, Item> > final_result;
+std::mutex my_mutex;
+
+
+void calculate(std::deque<Item> &queue_one, std::deque<Item> &queue_two, const Item &item, bool is_reversed) {
+  while (!queue_two.empty() && item.m_timestamp - 1 > queue_two.front().m_timestamp) {
+    queue_two.pop_front();
+  }
+
+  for (const Item &temp : queue_two) {
+    if (std::abs(item.m_timestamp - temp.m_timestamp) < 1) {
+      if (!is_reversed) {
+        final_result.emplace_back(item, temp);
+      } else {
+        final_result.emplace_back(temp, item);
+      }
     }
   }
-  
 }
-
-// function that will be executed by thread 1
-void Task1(TimestampStream & ss) {
-  while (true) {
-    if(!ss.HasNext()) break;
-    double val = ss.GetNext();
-    std::unique_lock<std::mutex> local_lock(m_mutex);  // RAII
-    Calculate(q1, q2, val,false);
+void addToQueueOne() {
+  BlockingStream stream(50, "Queue one");
+  while (stream.hasItem()) {
+    Item item = stream.Pop();
+    std::unique_lock<std::mutex> lock(my_mutex);
+    queue_one.push_back(item);
+    calculate(queue_one, queue_two, item, false);
   }
 }
 
-// function that will be executed by thread 2
-void Task2(TimestampStream & ss) {
-  while (true) {
-    if(!ss.HasNext()) break;
-    double val = ss.GetNext();
-    std::unique_lock<std::mutex> local_lock(m_mutex);
-    Calculate(q2, q1, val,true);
+void addToQueueTwo() {
+  BlockingStream stream(50, "Queue two");
+  while (stream.hasItem()) {
+    Item item = stream.Pop();
+    std::unique_lock<std::mutex> lock(my_mutex);
+    queue_two.push_back(item);
+    calculate(queue_two, queue_one, item, true);
   }
 }
+
 
 int main() {
-  std::vector<double> input1 = {0.2, 1.4, 3.0}, input2 = {1.0, 1.1, 3.5};
-  TimestampStream stream1(input1), stream2(input2);
-
-  std::thread t1(Task1, std::ref(stream1)), t2(Task2, std::ref(stream2) );
-
+  std::thread t1(addToQueueOne), t2(addToQueueTwo);
   t1.join();
   t2.join();
 
-  for(auto & item :  m_res) {
-    std::cout <<item.first<<':'<<item.second<<std::endl;
+  for (auto pair : final_result) {
+    std::cout << pair.first.toString() << " , " << pair.second.toString() << std::endl;
   }
   return 0;
 }
