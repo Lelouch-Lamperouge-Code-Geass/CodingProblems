@@ -56,13 +56,37 @@ If we are using MaxStack and MinStack which we need to implement from scratch, t
 
 ##### Push(int val) 
 
-We push number into the double linked list. Increase m_sum and m_count.
+We push number into the double linked list. Increase m_sum and m_count.  There operations cost O(1).
+
+We also need push the number int our two heaps/stacks. __Time complexity can be O(1) if use our customized stack or O(logN) if use Heap__.
 
 ##### Pop()  
 
-We pop number out of the double linked list. Decrease m_sum and m_count.
+We pop number out of the double linked list. Decrease m_sum and m_count. There operations cost O(1).
 
 And we also need to update the two heaps/stacks mentioned as above.
 
 ##### GetMode() 
 
+We define a class entry like this.
+
+```cpp
+struct Entry {   
+    int m_number;  
+    int m_freq;
+    ListIter m_freq_list_iter;
+};
+```
+
+Here we use a HashMap FrequencyToNumberList to store <frequency, ListOfNumber> pair and we also keep track of max frequency so far with m_max_frequncy.
+
+We use another HashMap NumberToEntry to store <number, Entry>.
+
+When we push a number, we can use NumberToEntry to get the Entry information, which stores its list postion in FrequencyToNumberList. We can then remove that position and add a new list_position with higher frequency.
+
+When we pop a number, we again use NumberToEntry to get the Entry information, which stores the list position. And we delete that list position and add a new list position at lower frequence list.
+
+Reminder:
+
+1. We may need to increase/decrease m_max_frequency everytime we Push or Pop a number.
+2. We may have a list on frequency = 3 , and the next list is on frequency is 20. Therefore, when every a list on FrequencyToNumberList is empty, we can delete that KeyValue pairs.
