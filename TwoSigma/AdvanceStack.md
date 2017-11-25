@@ -68,7 +68,7 @@ And we also need to update the two heaps/stacks mentioned as above.
 
 ##### GetMode() 
 
-We define a class entry like this.
+We define a struct entry like this.
 
 ```cpp
 struct Entry {   
@@ -90,3 +90,5 @@ Reminder:
 
 1. We may need to increase/decrease m_max_frequency everytime we Push or Pop a number.
 2. We may have a list on frequency = 3 , and the next list is on frequency is 20. Therefore, when every a list on FrequencyToNumberList is empty, we can delete that KeyValue pairs.
+
+
