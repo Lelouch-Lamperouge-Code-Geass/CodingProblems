@@ -1,6 +1,9 @@
 // https://segmentfault.com/a/1190000003819277#
-/***
- ***/
+
+
+### Problem one, general two dimension game of life
+
+```cpp
 class Solution {
 public:
   void gameOfLife(vector<vector<int>>& board) {
@@ -34,12 +37,15 @@ public:
     }
   }
 };
+```
 
+### Problem two, two dimension game of life with cyclic matrix
 
-// 如果循环矩阵如何解决？循环的意思是假设一个3x3的矩阵,则a[0][0]的左边是a[0][1]，其左上是a[2][2]
-// 这样我们的坐标要多加一个数组长度，使用坐标时还要取模
+如果循环矩阵如何解决？循环的意思是假设一个3x3的矩阵,则a[0][0]的左边是a[0][1]，其左上是a[2][2]
 
+这样我们的坐标要多加一个数组长度，使用坐标时还要取模
 
+```cpp
 class Solution {
 public:
   void gameOfLife(vector<vector<int>>& board) {
@@ -75,26 +81,19 @@ public:
     }
   }
 };
+```
 
-/***
+### Problem three, 
+
 In principle, the Life field is infinite, but computers have finite memory. 
-This leads to problems when the active area encroaches on the border of the array. 
-Programmers have used several strategies to address these problems. 
-The simplest strategy is simply to assume that every cell outside the array is dead. 
-This is easy to program, but leads to inaccurate results when the active area crosses the boundary. 
-A more sophisticated trick is to consider the left and right edges of the field to be stitched together, 
-and the top and bottom edges also, yielding a toroidal array. 
-The result is that active areas that move across a field edge reappear at the opposite edge. 
-Inaccuracy can still result if the pattern grows too large, but at least there are no pathological edge effects. 
-Techniques of dynamic storage allocation may also be used, creating ever-larger arrays to hold growing patterns.
-Alternatively, the programmer may abandon the notion of representing the Life field with a 2-dimensional array, 
-and use a different data structure, like a vector of coordinate pairs representing live cells. 
-This approach allows the pattern to move about the field unhindered, 
-as long as the population does not exceed the size of the live-coordinate array. 
-The drawback is that counting live neighbours becomes a hash-table lookup or search operation, 
-slowing down simulation speed. With more sophisticated data structures this problem can also be largely solved.
-***/
 
+This leads to problems when the active area encroaches on the border of the array. Programmers have used several strategies to address these problems. The simplest strategy is simply to assume that every cell outside the array is dead. This is easy to program, but leads to inaccurate results when the active area crosses the boundary. 
+
+A more sophisticated trick is to consider the left and right edges of the field to be stitched together,  and the top and bottom edges also, yielding a toroidal array. The result is that active areas that move across a field edge reappear at the opposite edge. Inaccuracy can still result if the pattern grows too large, but at least there are no pathological edge effects. Techniques of dynamic storage allocation may also be used, creating ever-larger arrays to hold growing patterns.
+
+Alternatively, the programmer may abandon the notion of representing the Life field with a 2-dimensional array,  and use a different data structure, like a vector of coordinate pairs representing live cells. This approach allows the pattern to move about the field unhindered, as long as the population does not exceed the size of the live-coordinate array. The drawback is that counting live neighbours becomes a hash-table lookup or search operation, slowing down simulation speed. With more sophisticated data structures this problem can also be largely solved.
+
+```cpp
 typedef std::unordered_map<std::size_t, std::unordered_map<std::size_t,std::size_t> > LiveMapper;
 
 class Solution {
@@ -163,3 +162,4 @@ public:
     }
   }
 };
+```
