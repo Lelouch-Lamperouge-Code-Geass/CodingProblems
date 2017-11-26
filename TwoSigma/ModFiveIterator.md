@@ -1,3 +1,7 @@
+给个产生随机数的iterator，你要写一个iterator来产生数是5的倍数.
+
+
+# Solution
 
 ```cpp
 #include <list>
