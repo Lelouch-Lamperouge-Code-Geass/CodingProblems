@@ -8,8 +8,6 @@
 #include <iostream>
 #include <cassert>
 
-
-
 class ModFiveIterator {
 public:
   typedef std::list<int>::iterator ListIterator;
@@ -34,7 +32,7 @@ public:
 private:
   void TryPeek() {
     // if m_peeked == true, do nothing
-    while (!m_peeked && m_pos < m_end) {
+    while (!m_peeked && m_pos != m_end) {
         if ( (*m_pos) % 5 == 0) {
           m_peeked = true;
           m_peeked_val = *m_pos;
@@ -90,9 +88,8 @@ void TestRemove() {
   assert(iter.HasNext() == true);
   assert(iter.Next() == 5);
 
-  iter.Remove();
-
-  iter.Remove();
+  iter.Remove(); // pop 10
+  iter.Remove(); // pop 15
 
   assert(iter.HasNext() == true);
   assert(iter.Next() == 20);
@@ -101,10 +98,12 @@ void TestRemove() {
 
 }
 
-
-int main() {
-  TestNextAndHasNext();
-  TestRemove();
-  return 0;
+int _tmain(int argc, _TCHAR* argv[])
+{
+	TestNextAndHasNext();
+	TestRemove();
+	return 0;
 }
+
+
 ```
