@@ -1,4 +1,4 @@
-# Problem one : How to check whether a long integer is power of 4.
+### Problem one : How to check whether a long integer is power of 4.
 
 ```cpp
 bool isPowerOfFour(long num) {
@@ -27,7 +27,7 @@ void UnitTest_PowerOfFour() {
 }
 ```
 
-# Problem two  : How to check whether a long integer is power of 3.
+### Problem two  : How to check whether a long integer is power of 3.
 
 Bit manipulation doesn't work here anymore.
 
