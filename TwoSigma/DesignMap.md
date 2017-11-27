@@ -203,6 +203,7 @@ Fear not, the smart people at the institute of super smart people have a solutio
 
 
 ### Dijkstra's algorithm
+
 __Dijkstra's algorithm__ is an algorithm for finding the __shortest paths__ between nodes in a graph, which may represent, for example, road networks. It was conceived by computer scientist Edsger W. Dijkstra in 1956 and published three years later.
 
 The algorithm exists in many variants; Dijkstra's original variant found the shortest path between two nodes, but a more common variant fixes a single node as the "source" node and finds shortest paths from the source to all other nodes in the graph, producing a __shortest-path tree__.
@@ -253,4 +254,204 @@ function Dijkstra(Graph, source):
 22
 23      return dist[], prev[]
 ```
+
+If we are only interested in a shortest path between vertices source and target, we can terminate the search after line 15 if u = target. Now we can read the shortest path from source to target by reverse iteration:
+
+```
+1  S ← empty sequence
+2  u ← target
+3  while prev[u] is defined:                  // Construct the shortest path with a stack S
+4      insert u at the beginning of S         // Push the vertex onto the stack
+5      u ← prev[u]                            // Traverse from target to source
+6  insert u at the beginning of S             // Push the source onto the stack
+```
+
+Now sequence S is the list of vertices constituting one of the shortest paths from source to target, or the empty sequence if no path exists.
+
+A more general problem would be to find all the shortest paths between source and target (there might be several different ones of the same length). Then instead of storing only a single node in each entry of prev[] we would store all nodes satisfying the relaxation condition. For example, if both r and source connect to target and both of them lie on different shortest paths through target (because the edge cost is the same in both cases), then we would add both r and source to prev[target]. When the algorithm completes, prev[] data structure will actually describe a graph that is a subset of the original graph with some edges removed. Its key property will be that if the algorithm was run with some starting node, then every path from that node to any other node in the new graph will be the shortest path between those nodes in the original graph, and all paths of that length from the original graph will be present in the new graph. Then to actually find all these shortest paths between two given nodes we would use a path finding algorithm on the new graph, such as depth-first search.
+
+#### Using a priority queue
+
+```
+1  function Dijkstra(Graph, source):
+2      dist[source] ← 0                                    // Initialization
+3
+4      create vertex set Q
+5
+6      for each vertex v in Graph:           
+7          if v ≠ source
+8              dist[v] ← INFINITY                          // Unknown distance from source to v
+9              prev[v] ← UNDEFINED                         // Predecessor of v
+10
+11         Q.add_with_priority(v, dist[v])
+12
+13
+14     while Q is not empty:                              // The main loop
+15         u ← Q.extract_min()                            // Remove and return best vertex
+16         for each neighbor v of u:                      // only v that is still in Q
+17             alt ← dist[u] + length(u, v) 
+18             if alt < dist[v]
+19                 dist[v] ← alt
+20                 prev[v] ← u
+21                 Q.decrease_priority(v, alt)
+22
+23     return dist[], prev[]
+```
+
+# Running time
+
+With a self-balancing binary search tree or binary heap, the algorithm requires O( (|E|+|V|) * log |V|).
+
+### Sample code
+
+Notice that below code does not use priority queue， that's because C++ doesn't have good built-in priority queue to support update priority.
+
+Another thing I want to point out is that below solution, Edge is unidirectional. Of source, bidirectional works basically the same.
+
+
+```cpp
+struct Vertex;
+typedef std::shared_ptr<Vertex> VertexPtr;
+struct Edge;
+typedef std::shared_ptr<Edge> EdgePtr;
+
+struct Vertex
+ {
+	 Vertex(std::string name) : m_vertex_name(name){}
+	 std::string m_vertex_name;
+	 std::unordered_set<EdgePtr> m_to_edges;
+};
+
+// Here is an unidirectional edge.
+struct Edge {
+	Edge(VertexPtr from, VertexPtr to, int weight) : m_from_vertex(from), m_to_vertex(to), m_weight(weight) {}
+	VertexPtr m_from_vertex;
+	VertexPtr m_to_vertex;
+	int m_weight;
+};
+
+VertexPtr GetUnvisitedMinDistanceVertex(const std::unordered_set<VertexPtr> &unvisited,
+					const std::unordered_map<VertexPtr, long> &distance_from_source) {
+	VertexPtr reval = nullptr;
+	for (const VertexPtr &vertex : unvisited) {
+		if (!reval) {
+			reval = vertex;
+		} else {
+			if (distance_from_source.at(vertex) < distance_from_source.at(reval)) {
+				reval = vertex;
+			}
+		}
+	}
+	return reval;
+}
+
+
+// Return values:
+// distance_from_source : Store the distance from source to here.
+// prev : Store previous vertex in shortest path
+void Dijkstra(const std::vector<VertexPtr> &graph, 
+			  VertexPtr source,
+			  std::unordered_map<VertexPtr, long> &distance_from_source,
+			  std::unordered_map<VertexPtr, VertexPtr> &prev) {
+
+	std::unordered_set<VertexPtr> unvisited;
+
+	for (const VertexPtr &vertex : graph) {
+		if (vertex != source) {
+			distance_from_source[vertex] = LONG_MAX;
+		}
+		prev[vertex] = nullptr;
+		unvisited.insert(vertex);
+	}
+
+	distance_from_source[source] = 0;
+
+	while (!unvisited.empty()) {
+		VertexPtr curr = GetUnvisitedMinDistanceVertex(unvisited, distance_from_source);
+		unvisited.erase(curr);
+		for (const EdgePtr& edge : curr->m_to_edges) {
+			int alternative_distance = distance_from_source[curr] + edge->m_weight;
+			if (alternative_distance < distance_from_source[edge->m_to_vertex]) {
+				distance_from_source[edge->m_to_vertex] = alternative_distance;
+				prev[edge->m_to_vertex] = curr;
+			}
+		}
+	}
+}
+
+std::vector<VertexPtr> GetShortestPathTo(const std::unordered_map<VertexPtr, VertexPtr> &prev,
+						const VertexPtr &source,
+					   const VertexPtr &destination) {
+	std::vector<VertexPtr> path;
+	VertexPtr curr = destination;
+	while (curr) {
+		path.emplace_back(curr);
+		curr = prev.at(curr);
+	}
+	std::reverse(path.begin(), path.end());
+	return path;
+}
+
+void PrintPath(const std::vector<VertexPtr>  &vertices) {
+	std::ostringstream oss;
+	for (const VertexPtr& vertex : vertices) {
+		oss << vertex->m_vertex_name;
+		oss << "->";
+	}
+	std::cout << oss.str() << std::endl;
+}
+
+void UnitTest() {
+	VertexPtr one = std::make_shared<Vertex>("1");
+	VertexPtr two = std::make_shared<Vertex>("2");
+	VertexPtr three = std::make_shared<Vertex>("3");
+	VertexPtr four = std::make_shared<Vertex>("4");
+	VertexPtr five = std::make_shared<Vertex>("5");
+	VertexPtr six = std::make_shared<Vertex>("6");
+
+	one->m_to_edges.insert(std::make_shared<Edge>(one, two, 7));
+	one->m_to_edges.insert(std::make_shared<Edge>(one, three, 9));
+	one->m_to_edges.insert(std::make_shared<Edge>(one, six, 14));
+
+	two->m_to_edges.insert(std::make_shared<Edge>(two, three, 10));
+	two->m_to_edges.insert(std::make_shared<Edge>(two, four, 15));
+
+	three->m_to_edges.insert(std::make_shared<Edge>(three, four, 11));
+	three->m_to_edges.insert(std::make_shared<Edge>(three, six, 2));
+
+	four->m_to_edges.insert(std::make_shared<Edge>(four, five, 6));
+
+	six->m_to_edges.insert(std::make_shared<Edge>(six, five, 9));
+
+	std::vector<VertexPtr> graph;
+	graph.push_back(one);
+	graph.push_back(two);
+	graph.push_back(three);
+	graph.push_back(four);
+	graph.push_back(five);
+	graph.push_back(six);
+
+	std::unordered_map<VertexPtr, long> distance_from_source;
+	std::unordered_map<VertexPtr, VertexPtr> prev;
+	Dijkstra(graph, one, distance_from_source, prev);
+	
+	assert(distance_from_source[one] == 0);
+	assert(distance_from_source[two] == 7);
+	assert(distance_from_source[three] == 9);
+	assert(distance_from_source[four] == 20);
+	assert(distance_from_source[five] == 20);
+	assert(distance_from_source[six] == 11);
+
+	std::vector<VertexPtr> shortest_path = GetShortestPathTo(prev, one, five);
+	PrintPath(shortest_path);
+}
+
+int _tmain(int argc, _TCHAR* argv[])
+{
+	UnitTest();
+	return 0;
+}
+
+```
+
 
