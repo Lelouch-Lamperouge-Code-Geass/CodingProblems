@@ -33,7 +33,7 @@ the other queue, if the difference > 1 , we pop the front item from the other qu
 If there are multiple streams, we can't simply pop like this.  
 For example, a new item comes in to Q1, and we compare the item with the front item in Q2, and if the difference > 1, can we pop the front item from Q2?  NO! Because there maybe a new item coming  to Q3 whose difference with the front item in Q2 is smaller than 1!  
 
-Therefore, we need maintain a MinHeap for all the tail items of these queues.  
+Therefore, we need __maintain a MinHeap for all the tail items of these queues__.  
 
 Let's see we have 10 streams, then we need 10 queues, and also a MinHeap which stores only the tail items of the 10 queues.  
 If a new item comes in to Q1, here is what we are going to do:  
@@ -126,6 +126,10 @@ void addToQueueOne() {
   BlockingStream stream(50, "Queue one");
   while (stream.hasItem()) {
     Item item = stream.Pop();
+    // Note that we use a mutex to define both queues as 
+    // critical section. And lock it here.
+    // If we don't lock here, thread 2 will keep adding items
+    // to queue 2, and this while will be infinite!
     std::unique_lock<std::mutex> lock(my_mutex);
     queue_one.push_back(item);
     calculate(queue_one, queue_two, item, false);
