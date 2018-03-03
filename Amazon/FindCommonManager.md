@@ -29,7 +29,6 @@ Right now, write a function to return the lowest common manager of two employees
 # Solution
 
 ```cpp
-
 Employee* findCommonManager(Employee *cur_employee, Employee *employee_one, Employee *employee_two) {
 	if (!cur_employee || cur_employee == employee_one || cur_employee == employee_two) return cur_employee;
 	bool is_managing_employee_one(false), is_managing_employee_two(false);
@@ -42,18 +41,21 @@ Employee* findCommonManager(Employee *cur_employee, Employee *employee_one, Empl
 		} else if (temp_manager == employee_two) {
 			is_managing_employee_two = true;
 		} else if (temp_manager) {
+			// temp_manager doesn't equal to employee_one or employee_two
+			// and it is not nullptr.
       			return temp_manager;
     		}
 	}
 
 	if (is_managing_employee_one && is_managing_employee_two) {
+		// Current employee is managing employee_one and employee_two
 		return cur_employee;
-	}
-	else {
+	} else {
+		// Current employee is managing none of both employees,
+		// Or at most only one of them.
 		if (is_managing_employee_one) return employee_one;
 		else if (is_managing_employee_two) return employee_two;
 		else return nullptr;
 	}
 }
-
 ```
