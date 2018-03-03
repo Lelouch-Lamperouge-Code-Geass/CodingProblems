@@ -42,8 +42,8 @@ Employee* findCommonManager(Employee *cur_employee, Employee *employee_one, Empl
 		} else if (temp_manager == employee_two) {
 			is_managing_employee_two = true;
 		} else if (temp_manager) {
-      return temp_manager;
-    }
+      			return temp_manager;
+    		}
 	}
 
 	if (is_managing_employee_one && is_managing_employee_two) {
