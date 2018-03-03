@@ -33,8 +33,8 @@ vector<string> substringWithOneRepeatChar(const string &str, int k) {
 				-- number_of_repeat_chars_in_window;
 			}
 		}
-
-		if (number_of_repeat_chars_in_window == 1) {
+		
+		if (i + 1 >= k && number_of_repeat_chars_in_window == 1) {
 			unique_results.insert(str.substr(i - k + 1, k));
 		}
 	}
