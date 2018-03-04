@@ -104,7 +104,8 @@ vector<int> minWindow(const vector<string> &targetList,
 
 void UnitTest() {
 	vector<string> targetList = { "made", "in", "Spain" };
-	vector<string> availableTagList = { "made", "weather", "forecase", "says", "that", "made", "rain", "in", "spain", "stays" };
+	vector<string> availableTagList = { "made", "weather", "forecase", "says", 
+		"that", "made", "rain", "in", "spain", "stays" };
 	vector<int> result = minWindow(targetList, availableTagList);
 	assert(result[0] == 5);
 	assert(result[1] == 8);
