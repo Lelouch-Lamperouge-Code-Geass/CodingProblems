@@ -89,7 +89,9 @@ vector<int> minWindow(const vector<string> &targetList,
 			++ number_of_tag_missing_in_window[getLowercaseString(availableTagList[window_start])];
 
 			// If the popped tag is one of the tag in targetList
-			if (number_of_tag_missing_in_window[getLowercaseString(availableTagList[window_start])] > 0) ++tags_to_find;
+			if (number_of_tag_missing_in_window[getLowercaseString(availableTagList[window_start])] > 0) {
+				++tags_to_find;
+			}
 
 			++ window_start;
 		}
